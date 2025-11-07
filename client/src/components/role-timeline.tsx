@@ -16,6 +16,7 @@ interface TimelineTask {
 interface RoleTimelineProps {
   memberName: string;
   role: string;
+  advisor?: string;
   avatarColor: string;
   tasks: TimelineTask[];
   compact?: boolean;
@@ -26,6 +27,7 @@ interface RoleTimelineProps {
 export function RoleTimeline({
   memberName,
   role,
+  advisor,
   avatarColor,
   tasks,
   compact = false,
@@ -71,6 +73,11 @@ export function RoleTimeline({
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-sm">{memberName}</h4>
             <p className="text-xs text-muted-foreground">{role}</p>
+            {advisor && (
+              <p className="text-xs text-muted-foreground/80 mt-0.5">
+                Advisor: {advisor}
+              </p>
+            )}
           </div>
           <Badge variant="secondary" className="text-xs">
             {completedCount}/{tasks.length}
@@ -120,6 +127,11 @@ export function RoleTimeline({
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg">{memberName}</CardTitle>
             <p className="text-sm text-muted-foreground mt-0.5">{role}</p>
+            {advisor && (
+              <p className="text-xs text-muted-foreground/70 mt-1" data-testid={`text-advisor-${memberName.toLowerCase().replace(/\s+/g, '-')}`}>
+                Advisor: {advisor}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="font-medium">

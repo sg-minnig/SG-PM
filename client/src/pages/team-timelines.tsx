@@ -14,6 +14,7 @@ interface TimelineTask {
 interface RoleTimelineData {
   memberName: string;
   role: string;
+  advisor: string;
   avatarColor: string;
   memberId: string;
   tasks: TimelineTask[];
@@ -43,6 +44,7 @@ export default function TeamTimelines() {
     {
       memberName: "Alex Chen",
       role: "President",
+      advisor: "Dr. Sarah Martinez",
       avatarColor: "#3b82f6",
       memberId: "member-1",
       tasks: [
@@ -56,6 +58,7 @@ export default function TeamTimelines() {
     {
       memberName: "Jordan Lee",
       role: "Vice President",
+      advisor: "Dr. Sarah Martinez",
       avatarColor: "#8b5cf6",
       memberId: "member-2",
       tasks: [
@@ -69,6 +72,7 @@ export default function TeamTimelines() {
     {
       memberName: "Sam Wilson",
       role: "Treasurer",
+      advisor: "Prof. Michael Chen",
       avatarColor: "#10b981",
       memberId: "member-3",
       tasks: [
@@ -82,6 +86,7 @@ export default function TeamTimelines() {
     {
       memberName: "Taylor Kim",
       role: "Events Coordinator",
+      advisor: "Dr. Emily Parker",
       avatarColor: "#f59e0b",
       memberId: "member-4",
       tasks: [
@@ -94,6 +99,7 @@ export default function TeamTimelines() {
     {
       memberName: "Morgan Davis",
       role: "Marketing Director",
+      advisor: "Dr. James Anderson",
       avatarColor: "#ec4899",
       memberId: "member-5",
       tasks: [
@@ -106,6 +112,7 @@ export default function TeamTimelines() {
     {
       memberName: "Casey Brown",
       role: "Social Media Manager",
+      advisor: "Dr. James Anderson",
       avatarColor: "#14b8a6",
       memberId: "member-6",
       tasks: [

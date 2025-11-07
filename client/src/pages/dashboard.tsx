@@ -46,6 +46,7 @@ export default function Dashboard() {
     {
       memberName: "Alex Chen",
       role: "President",
+      advisor: "Dr. Sarah Martinez",
       avatarColor: "#3b82f6",
       tasks: [
         { id: "1", title: "Review transition documents", status: "completed" as const, order: 1 },
@@ -58,6 +59,7 @@ export default function Dashboard() {
     {
       memberName: "Sam Wilson",
       role: "Treasurer",
+      advisor: "Prof. Michael Chen",
       avatarColor: "#10b981",
       tasks: [
         { id: "1", title: "Review last year's budget", status: "completed" as const, order: 1 },
@@ -70,6 +72,7 @@ export default function Dashboard() {
     {
       memberName: "Jordan Lee",
       role: "Vice President",
+      advisor: "Dr. Sarah Martinez",
       avatarColor: "#8b5cf6",
       tasks: [
         { id: "1", title: "Meet with outgoing VP", status: "completed" as const, order: 1 },
