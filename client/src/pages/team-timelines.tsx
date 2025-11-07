@@ -1,11 +1,46 @@
+import { useState } from "react";
 import { RoleTimeline } from "@/components/role-timeline";
 
+interface TimelineTask {
+  id: string;
+  title: string;
+  status: "completed" | "in-progress" | "upcoming";
+  order: number;
+  isCustom?: boolean;
+}
+
+interface RoleTimelineData {
+  memberName: string;
+  role: string;
+  avatarColor: string;
+  memberId: string;
+  tasks: TimelineTask[];
+}
+
 export default function TeamTimelines() {
-  const roleTimelines = [
+  const [customTasks, setCustomTasks] = useState<Record<string, TimelineTask[]>>({});
+
+  const handleAddTask = (memberId: string) => (task: { title: string; status: string; order: number }) => {
+    const newTask: TimelineTask = {
+      id: `custom-${Date.now()}`,
+      title: task.title,
+      status: task.status as "completed" | "in-progress" | "upcoming",
+      order: task.order,
+      isCustom: true,
+    };
+
+    setCustomTasks(prev => ({
+      ...prev,
+      [memberId]: [...(prev[memberId] || []), newTask],
+    }));
+  };
+
+  const baseRoleTimelines: RoleTimelineData[] = [
     {
       memberName: "Alex Chen",
       role: "President",
       avatarColor: "#3b82f6",
+      memberId: "member-1",
       tasks: [
         { id: "1", title: "Review transition documents", status: "completed" as const, order: 1 },
         { id: "2", title: "Schedule first executive meeting", status: "completed" as const, order: 2 },
@@ -18,6 +53,7 @@ export default function TeamTimelines() {
       memberName: "Jordan Lee",
       role: "Vice President",
       avatarColor: "#8b5cf6",
+      memberId: "member-2",
       tasks: [
         { id: "1", title: "Meet with outgoing VP", status: "completed" as const, order: 1 },
         { id: "2", title: "Review club constitution", status: "in-progress" as const, order: 2 },
@@ -30,6 +66,7 @@ export default function TeamTimelines() {
       memberName: "Sam Wilson",
       role: "Treasurer",
       avatarColor: "#10b981",
+      memberId: "member-3",
       tasks: [
         { id: "1", title: "Review last year's budget", status: "completed" as const, order: 1 },
         { id: "2", title: "Submit budget proposal", status: "completed" as const, order: 2 },
@@ -42,6 +79,7 @@ export default function TeamTimelines() {
       memberName: "Taylor Kim",
       role: "Events Coordinator",
       avatarColor: "#f59e0b",
+      memberId: "member-4",
       tasks: [
         { id: "1", title: "Review past event analytics", status: "completed" as const, order: 1 },
         { id: "2", title: "Recruit new members", status: "in-progress" as const, order: 2 },
@@ -53,6 +91,7 @@ export default function TeamTimelines() {
       memberName: "Morgan Davis",
       role: "Marketing Director",
       avatarColor: "#ec4899",
+      memberId: "member-5",
       tasks: [
         { id: "1", title: "Audit current social media presence", status: "completed" as const, order: 1 },
         { id: "2", title: "Update social media profiles", status: "in-progress" as const, order: 2 },
@@ -64,6 +103,7 @@ export default function TeamTimelines() {
       memberName: "Casey Brown",
       role: "Social Media Manager",
       avatarColor: "#14b8a6",
+      memberId: "member-6",
       tasks: [
         { id: "1", title: "Organize team building activity", status: "completed" as const, order: 1 },
         { id: "2", title: "Set posting schedule", status: "completed" as const, order: 2 },
@@ -85,11 +125,20 @@ export default function TeamTimelines() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {roleTimelines.map((timeline) => (
-          <div key={timeline.memberName} className="border-0 shadow-sm">
-            <RoleTimeline {...timeline} />
-          </div>
-        ))}
+        {baseRoleTimelines.map((timeline) => {
+          const memberCustomTasks = customTasks[timeline.memberId] || [];
+          const allTasks = [...timeline.tasks, ...memberCustomTasks].sort((a, b) => a.order - b.order);
+
+          return (
+            <div key={timeline.memberName} className="border-0 shadow-sm">
+              <RoleTimeline
+                {...timeline}
+                tasks={allTasks}
+                onTaskAdded={handleAddTask(timeline.memberId)}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
