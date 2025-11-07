@@ -240,7 +240,24 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply text-foreground font-sans antialiased;
+    background: linear-gradient(135deg, 
+      hsl(330, 100%, 97%) 0%, 
+      hsl(210, 100%, 97%) 25%, 
+      hsl(270, 100%, 97%) 50%, 
+      hsl(180, 100%, 97%) 75%, 
+      hsl(50, 100%, 97%) 100%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, 
+      hsl(330, 40%, 12%) 0%, 
+      hsl(240, 40%, 11%) 25%, 
+      hsl(270, 35%, 12%) 50%, 
+      hsl(200, 40%, 11%) 75%, 
+      hsl(220, 45%, 11%) 100%);
+    background-attachment: fixed;
   }
 }
 
