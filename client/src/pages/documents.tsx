@@ -65,51 +65,51 @@ export default function Documents() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold" data-testid="text-page-title">
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-semibold tracking-tight" data-testid="text-page-title">
           Documents
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-lg text-muted-foreground">
           Upload transition documents and let AI extract tasks
         </p>
       </div>
 
       <Card
-        className={`border-2 border-dashed transition-colors ${
-          isDragging ? "border-primary bg-primary/5" : "border-border"
+        className={`border-2 border-dashed shadow-sm transition-all ${
+          isDragging ? "border-primary bg-primary/5 shadow-lg" : "border-border/50"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         data-testid="dropzone-upload"
       >
-        <CardContent className="flex flex-col items-center justify-center min-h-64 p-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-            <Upload className="h-8 w-8 text-primary" />
+        <CardContent className="flex flex-col items-center justify-center min-h-72 p-12">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+            <Upload className="h-10 w-10 text-primary" />
           </div>
-          <h3 className="text-lg font-medium mb-2">
+          <h3 className="text-xl font-semibold mb-2">
             Drop your documents here
           </h3>
-          <p className="text-sm text-muted-foreground text-center mb-4 max-w-sm">
+          <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
             Upload transition documents, timelines, or handover notes. Our AI will
             analyze them and suggest relevant tasks.
           </p>
-          <Button data-testid="button-upload">
+          <Button size="lg" data-testid="button-upload">
             <Upload className="h-4 w-4 mr-2" />
             Browse Files
           </Button>
-          <p className="text-xs text-muted-foreground mt-3">
+          <p className="text-xs text-muted-foreground mt-4">
             Supports PDF, DOCX, TXT (Max 10MB)
           </p>
         </CardContent>
       </Card>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Uploaded Documents</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <h2 className="text-2xl font-semibold mb-6">Uploaded Documents</h2>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {documents.map((doc) => (
-            <Card key={doc.id} data-testid={`card-document-${doc.id}`}>
+            <Card key={doc.id} className="border-0 shadow-sm hover-elevate" data-testid={`card-document-${doc.id}`}>
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">

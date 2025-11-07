@@ -81,30 +81,34 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold" data-testid="text-page-title">
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-semibold tracking-tight" data-testid="text-page-title">
           Dashboard
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-lg text-muted-foreground">
           Track role progress and upcoming activities
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Team Role Progress
-          </CardTitle>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Target className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Team Role Progress</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                See where each executive is in their role-specific task timeline
+              </p>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            See where each executive is in their role-specific task timeline
-          </p>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {roleTimelines.map((timeline) => (
-              <div key={timeline.memberName} className="p-4 rounded-lg border border-border bg-card">
+              <div key={timeline.memberName} className="p-5 rounded-xl border border-border bg-background shadow-sm hover-elevate">
                 <RoleTimeline {...timeline} compact={true} />
               </div>
             ))}
@@ -112,42 +116,44 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl">Recent Activity</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {recentTasks.map((task) => (
               <TaskCard key={task.id} {...task} />
             ))}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Upcoming Deadlines
-            </CardTitle>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Upcoming Deadlines</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {recentTasks
                 .filter((t) => t.status !== "completed")
                 .map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover-elevate"
                     data-testid={`deadline-${task.id}`}
                   >
                     <div className="flex-1">
                       <h4 className="font-medium">{task.title}</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground mt-1">
                         Assigned to {task.assignee.name}
                       </p>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground ml-4">
                       {task.deadline && format(task.deadline, "MMM d, yyyy")}
                     </div>
                   </div>

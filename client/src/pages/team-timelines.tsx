@@ -74,19 +74,21 @@ export default function TeamTimelines() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold" data-testid="text-page-title">
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-semibold tracking-tight" data-testid="text-page-title">
           Role Timelines
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-lg text-muted-foreground">
           Detailed view of each executive's progress through their role-specific tasks
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {roleTimelines.map((timeline) => (
-          <RoleTimeline key={timeline.memberName} {...timeline} />
+          <div key={timeline.memberName} className="border-0 shadow-sm">
+            <RoleTimeline {...timeline} />
+          </div>
         ))}
       </div>
     </div>

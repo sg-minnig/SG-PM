@@ -45,12 +45,14 @@ function App() {
             <div className="flex h-screen w-full">
               <AppSidebar />
               <div className="flex flex-col flex-1">
-                <header className="flex items-center justify-between p-4 border-b border-border sticky top-0 z-50 bg-background">
+                <header className="flex items-center justify-between px-8 py-4 border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                   <SidebarTrigger data-testid="button-sidebar-toggle" />
                   <ThemeToggle />
                 </header>
-                <main className="flex-1 overflow-auto p-6">
-                  <Router />
+                <main className="flex-1 overflow-auto p-8 lg:p-12">
+                  <div className="max-w-7xl mx-auto">
+                    <Router />
+                  </div>
                 </main>
               </div>
             </div>

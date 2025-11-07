@@ -88,41 +88,41 @@ export function RoleTimeline({
   }
 
   return (
-    <Card data-testid={`timeline-full-${memberName.toLowerCase().replace(/\s+/g, '-')}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12" style={{ backgroundColor: avatarColor }}>
+    <Card className="border-0 shadow-sm" data-testid={`timeline-full-${memberName.toLowerCase().replace(/\s+/g, '-')}`}>
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-14 w-14" style={{ backgroundColor: avatarColor }}>
             <AvatarFallback
-              className="text-base font-medium"
+              className="text-lg font-medium"
               style={{ backgroundColor: avatarColor, color: "white" }}
             >
               {getInitials(memberName)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <CardTitle className="text-base">{memberName}</CardTitle>
-            <p className="text-sm text-muted-foreground">{role}</p>
+            <CardTitle className="text-lg">{memberName}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-0.5">{role}</p>
           </div>
-          <Badge variant="outline">
+          <Badge variant="outline" className="font-medium">
             {completedCount}/{tasks.length} complete
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-1">
+      <CardContent className="space-y-5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Timeline Progress</span>
-            <span className="font-medium">{Math.round(progress)}%</span>
+            <span className="font-semibold">{Math.round(progress)}%</span>
           </div>
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+          <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary transition-all duration-300"
+              className="h-full bg-primary transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {tasks.map((task, index) => (
             <div
               key={task.id}
@@ -135,13 +135,13 @@ export function RoleTimeline({
                 ) : task.status === "in-progress" ? (
                   <Clock className="h-5 w-5 text-primary flex-shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <Circle className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
                 )}
                 {index < tasks.length - 1 && (
                   <div
-                    className={`w-0.5 h-8 mt-1 ${
+                    className={`w-0.5 h-10 mt-1.5 ${
                       task.status === "completed"
-                        ? "bg-chart-3"
+                        ? "bg-chart-3/30"
                         : "bg-border"
                     }`}
                   />
@@ -160,7 +160,7 @@ export function RoleTimeline({
                   {task.title}
                 </p>
                 {task.status === "in-progress" && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
+                  <Badge variant="secondary" className="mt-1.5 text-xs">
                     In Progress
                   </Badge>
                 )}

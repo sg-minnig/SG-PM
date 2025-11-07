@@ -53,30 +53,30 @@ export function TaskCard({
 
   return (
     <Card
-      className={`p-4 border-l-4 ${priorityColors[priority]} hover-elevate ${
+      className={`p-5 border-0 shadow-sm border-l-4 ${priorityColors[priority]} hover-elevate ${
         isDragging ? "opacity-50" : ""
       }`}
       data-testid={`card-task-${id}`}
     >
       <div className="space-y-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-base line-clamp-2" data-testid={`text-task-title-${id}`}>
               {title}
             </h4>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
                 {description}
               </p>
             )}
           </div>
-          <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0 cursor-grab" />
+          <GripVertical className="h-5 w-5 text-muted-foreground/40 flex-shrink-0 cursor-grab" />
         </div>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {assignee && (
-              <Avatar className="h-6 w-6" style={{ backgroundColor: assignee.avatarColor }}>
+              <Avatar className="h-7 w-7" style={{ backgroundColor: assignee.avatarColor }}>
                 <AvatarFallback
                   className="text-xs font-medium"
                   style={{ backgroundColor: assignee.avatarColor, color: "white" }}
@@ -86,13 +86,13 @@ export function TaskCard({
               </Avatar>
             )}
             {deadline && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
                 <span>{format(deadline, "MMM d")}</span>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {aiGenerated && (
               <Badge variant="secondary" className="text-xs">
                 AI
