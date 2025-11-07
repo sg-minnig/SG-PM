@@ -12,6 +12,7 @@ import Tasks from "@/pages/tasks";
 import Kanban from "@/pages/kanban";
 import Documents from "@/pages/documents";
 import Team from "@/pages/team";
+import TeamTimelines from "@/pages/team-timelines";
 import TaskReview from "@/pages/task-review";
 import NotFound from "@/pages/not-found";
 
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/tasks" component={Tasks} />
       <Route path="/kanban" component={Kanban} />
+      <Route path="/timelines" component={TeamTimelines} />
       <Route path="/documents" component={Documents} />
       <Route path="/team" component={Team} />
       <Route path="/task-review" component={TaskReview} />

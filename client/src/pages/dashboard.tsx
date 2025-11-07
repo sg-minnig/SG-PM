@@ -1,5 +1,6 @@
 import { StatCard } from "@/components/stat-card";
 import { TaskCard } from "@/components/task-card";
+import { RoleTimeline } from "@/components/role-timeline";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ClipboardList,
@@ -7,6 +8,7 @@ import {
   Clock,
   Users,
   TrendingUp,
+  Target,
 } from "lucide-react";
 import {
   Bar,
@@ -58,6 +60,44 @@ export default function Dashboard() {
       assignee: { name: "Sam Wilson", avatarColor: "#10b981" },
       deadline: new Date(2024, 11, 10),
       aiGenerated: true,
+    },
+  ];
+
+  const roleTimelines = [
+    {
+      memberName: "Alex Chen",
+      role: "President",
+      avatarColor: "#3b82f6",
+      tasks: [
+        { id: "1", title: "Review transition documents", status: "completed" as const, order: 1 },
+        { id: "2", title: "Schedule first executive meeting", status: "completed" as const, order: 2 },
+        { id: "3", title: "Plan semester kickoff event", status: "in-progress" as const, order: 3 },
+        { id: "4", title: "Set quarterly goals with team", status: "upcoming" as const, order: 4 },
+        { id: "5", title: "Prepare annual report", status: "upcoming" as const, order: 5 },
+      ],
+    },
+    {
+      memberName: "Sam Wilson",
+      role: "Treasurer",
+      avatarColor: "#10b981",
+      tasks: [
+        { id: "1", title: "Review last year's budget", status: "completed" as const, order: 1 },
+        { id: "2", title: "Submit budget proposal", status: "completed" as const, order: 2 },
+        { id: "3", title: "Set up financial tracking system", status: "completed" as const, order: 3 },
+        { id: "4", title: "Schedule finance committee meeting", status: "in-progress" as const, order: 4 },
+        { id: "5", title: "Create quarterly financial report", status: "upcoming" as const, order: 5 },
+      ],
+    },
+    {
+      memberName: "Jordan Lee",
+      role: "Vice President",
+      avatarColor: "#8b5cf6",
+      tasks: [
+        { id: "1", title: "Meet with outgoing VP", status: "completed" as const, order: 1 },
+        { id: "2", title: "Review club constitution", status: "in-progress" as const, order: 2 },
+        { id: "3", title: "Update club website", status: "upcoming" as const, order: 3 },
+        { id: "4", title: "Coordinate with other executives", status: "upcoming" as const, order: 4 },
+      ],
     },
   ];
 
@@ -146,6 +186,27 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Role Timeline Progress
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Track where each executive is in their role-specific task timeline
+          </p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {roleTimelines.map((timeline) => (
+              <div key={timeline.memberName} className="p-4 rounded-lg border border-border bg-card">
+                <RoleTimeline {...timeline} compact={true} />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

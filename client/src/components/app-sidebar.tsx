@@ -5,6 +5,7 @@ import {
   Upload,
   Users,
   Settings,
+  Target,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -37,6 +38,12 @@ const menuItems = [
     url: "/kanban",
     icon: LayoutGrid,
     testId: "link-kanban",
+  },
+  {
+    title: "Role Timelines",
+    url: "/timelines",
+    icon: Target,
+    testId: "link-timelines",
   },
   {
     title: "Documents",
