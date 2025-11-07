@@ -1,13 +1,31 @@
-import { type User, type InsertUser, type CustomTimelineTask, type InsertCustomTimelineTask } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+// Database storage implementation
+import {
+  users,
+  teamMembers,
+  customTimelineTasks,
+  type User,
+  type UpsertUser,
+  type TeamMember,
+  type InsertTeamMember,
+  type CustomTimelineTask,
+  type InsertCustomTimelineTask,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
+  // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUserRole(id: string, role: string): Promise<User | undefined>;
+  
+  // Team member operations
+  getTeamMembers(): Promise<TeamMember[]>;
+  getTeamMemberByUserId(userId: string): Promise<TeamMember | undefined>;
+  linkTeamMemberToUser(email: string, userId: string): Promise<void>;
+  createTeamMember(member: InsertTeamMember): Promise<TeamMember>;
+  updateTeamMember(id: string, updates: Partial<InsertTeamMember>): Promise<TeamMember | undefined>;
+  deleteTeamMember(id: string): Promise<boolean>;
   
   // Custom timeline tasks
   getCustomTimelineTasks(memberId: string): Promise<CustomTimelineTask[]>;
@@ -16,62 +34,118 @@ export interface IStorage {
   deleteCustomTimelineTask(id: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private customTimelineTasks: Map<string, CustomTimelineTask>;
-
-  constructor() {
-    this.users = new Map();
-    this.customTimelineTasks = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
+  // User operations
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async getCustomTimelineTasks(memberId: string): Promise<CustomTimelineTask[]> {
-    return Array.from(this.customTimelineTasks.values()).filter(
-      (task) => task.memberId === memberId,
-    );
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    // Normalize email to lowercase for consistent matching
+    const normalizedData = {
+      ...userData,
+      email: userData.email?.toLowerCase().trim() || null,
+    };
+    
+    const [user] = await db
+      .insert(users)
+      .values(normalizedData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...normalizedData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 
-  async createCustomTimelineTask(insertTask: InsertCustomTimelineTask): Promise<CustomTimelineTask> {
-    const id = randomUUID();
-    const task: CustomTimelineTask = {
-      ...insertTask,
-      id,
-      isCustom: true,
-      createdAt: new Date(),
+  async updateUserRole(id: string, role: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  // Team member operations
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return await db.select().from(teamMembers);
+  }
+
+  async getTeamMemberByUserId(userId: string): Promise<TeamMember | undefined> {
+    const [member] = await db.select().from(teamMembers).where(eq(teamMembers.userId, userId));
+    return member;
+  }
+
+  async linkTeamMemberToUser(email: string, userId: string): Promise<void> {
+    // Normalize email for case-insensitive matching
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Find team member by email and link to user if not already linked
+    await db
+      .update(teamMembers)
+      .set({ userId })
+      .where(eq(teamMembers.email, normalizedEmail));
+  }
+
+  async createTeamMember(memberData: InsertTeamMember): Promise<TeamMember> {
+    // Normalize email to lowercase for consistent matching
+    const normalizedData = {
+      ...memberData,
+      email: memberData.email.toLowerCase().trim(),
     };
-    this.customTimelineTasks.set(id, task);
+    
+    const [member] = await db.insert(teamMembers).values(normalizedData).returning();
+    return member;
+  }
+
+  async updateTeamMember(id: string, updates: Partial<InsertTeamMember>): Promise<TeamMember | undefined> {
+    // Normalize email if it's being updated
+    const normalizedUpdates = {
+      ...updates,
+      ...(updates.email ? { email: updates.email.toLowerCase().trim() } : {}),
+    };
+    
+    const [member] = await db
+      .update(teamMembers)
+      .set(normalizedUpdates)
+      .where(eq(teamMembers.id, id))
+      .returning();
+    return member;
+  }
+
+  async deleteTeamMember(id: string): Promise<boolean> {
+    const result = await db.delete(teamMembers).where(eq(teamMembers.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Custom timeline tasks
+  async getCustomTimelineTasks(memberId: string): Promise<CustomTimelineTask[]> {
+    return await db.select().from(customTimelineTasks).where(eq(customTimelineTasks.memberId, memberId));
+  }
+
+  async createCustomTimelineTask(taskData: InsertCustomTimelineTask): Promise<CustomTimelineTask> {
+    const [task] = await db.insert(customTimelineTasks).values(taskData).returning();
     return task;
   }
 
   async updateCustomTimelineTask(id: string, updates: Partial<InsertCustomTimelineTask>): Promise<CustomTimelineTask | undefined> {
-    const task = this.customTimelineTasks.get(id);
-    if (!task) return undefined;
-
-    const updatedTask = { ...task, ...updates };
-    this.customTimelineTasks.set(id, updatedTask);
-    return updatedTask;
+    const [task] = await db
+      .update(customTimelineTasks)
+      .set(updates)
+      .where(eq(customTimelineTasks.id, id))
+      .returning();
+    return task;
   }
 
   async deleteCustomTimelineTask(id: string): Promise<boolean> {
-    return this.customTimelineTasks.delete(id);
+    const result = await db.delete(customTimelineTasks).where(eq(customTimelineTasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

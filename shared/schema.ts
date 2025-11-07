@@ -1,20 +1,42 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table (required for Replit Auth)
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table (updated for Replit Auth + role management)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  role: varchar("role").notNull().default("member"), // "president" or "member"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Team members table (linked to users after login)
 export const teamMembers = pgTable("team_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"), // references users.id - null until user logs in
   name: text("name").notNull(),
-  role: text("role").notNull(),
-  email: text("email").notNull(),
+  position: text("position").notNull(), // "President", "Vice President", etc.
+  advisor: text("advisor"),
+  email: text("email").notNull().unique(), // Used to link to user account
   avatarColor: text("avatar_color").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const customTimelineTasks = pgTable("custom_timeline_tasks", {
@@ -49,13 +71,40 @@ export const documents = pgTable("documents", {
   analyzed: boolean("analyzed").default(false),
 });
 
+// Relations
+export const usersRelations = relations(users, ({ one }) => ({
+  teamMember: one(teamMembers, {
+    fields: [users.id],
+    references: [teamMembers.userId],
+  }),
+}));
+
+export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [teamMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+// Zod schemas
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  profileImageUrl: true,
+});
+
+export const upsertUserSchema = createInsertSchema(users).pick({
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  profileImageUrl: true,
 });
 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
   id: true,
+  createdAt: true,
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
@@ -74,8 +123,10 @@ export const insertCustomTimelineTaskSchema = createInsertSchema(customTimelineT
   isCustom: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Types
 export type User = typeof users.$inferSelect;
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
 export type Task = typeof tasks.$inferSelect;
