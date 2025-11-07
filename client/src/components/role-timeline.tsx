@@ -1,13 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CheckCircle2, Circle, Clock } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Sparkles } from "lucide-react";
+import { AddCustomTaskDialog } from "./add-custom-task-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface TimelineTask {
   id: string;
   title: string;
   status: "completed" | "in-progress" | "upcoming";
   order: number;
+  isCustom?: boolean;
 }
 
 interface RoleTimelineProps {
@@ -16,6 +19,8 @@ interface RoleTimelineProps {
   avatarColor: string;
   tasks: TimelineTask[];
   compact?: boolean;
+  memberId?: string;
+  onTaskAdded?: (task: { title: string; status: string; order: number }) => void;
 }
 
 export function RoleTimeline({
@@ -24,7 +29,10 @@ export function RoleTimeline({
   avatarColor,
   tasks,
   compact = false,
+  memberId,
+  onTaskAdded,
 }: RoleTimelineProps) {
+  const { toast } = useToast();
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -37,6 +45,16 @@ export function RoleTimeline({
   const currentTask = tasks.find((t) => t.status === "in-progress");
   const completedCount = tasks.filter((t) => t.status === "completed").length;
   const progress = (completedCount / tasks.length) * 100;
+
+  const handleAddTask = (task: { title: string; status: string; order: number }) => {
+    if (onTaskAdded) {
+      onTaskAdded(task);
+      toast({
+        title: "Task added",
+        description: `"${task.title}" has been added to your timeline.`,
+      });
+    }
+  };
 
   if (compact) {
     return (
@@ -90,7 +108,7 @@ export function RoleTimeline({
   return (
     <Card className="border-0 shadow-sm" data-testid={`timeline-full-${memberName.toLowerCase().replace(/\s+/g, '-')}`}>
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <Avatar className="h-14 w-14" style={{ backgroundColor: avatarColor }}>
             <AvatarFallback
               className="text-lg font-medium"
@@ -99,13 +117,23 @@ export function RoleTimeline({
               {getInitials(memberName)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <CardTitle className="text-lg">{memberName}</CardTitle>
             <p className="text-sm text-muted-foreground mt-0.5">{role}</p>
           </div>
-          <Badge variant="outline" className="font-medium">
-            {completedCount}/{tasks.length} complete
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-medium">
+              {completedCount}/{tasks.length} complete
+            </Badge>
+            {onTaskAdded && (
+              <AddCustomTaskDialog
+                memberName={memberName}
+                currentTaskCount={tasks.length}
+                hasCurrentTask={!!currentTask}
+                onAddTask={handleAddTask}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -148,17 +176,25 @@ export function RoleTimeline({
                 )}
               </div>
               <div className="flex-1 min-w-0 pt-0.5">
-                <p
-                  className={`text-sm font-medium ${
-                    task.status === "completed"
-                      ? "text-muted-foreground line-through"
-                      : task.status === "in-progress"
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {task.title}
-                </p>
+                <div className="flex items-start gap-2">
+                  <p
+                    className={`text-sm font-medium flex-1 ${
+                      task.status === "completed"
+                        ? "text-muted-foreground line-through"
+                        : task.status === "in-progress"
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {task.title}
+                  </p>
+                  {task.isCustom && (
+                    <Badge variant="outline" className="text-xs gap-1 flex-shrink-0">
+                      <Sparkles className="h-3 w-3" />
+                      Custom
+                    </Badge>
+                  )}
+                </div>
                 {task.status === "in-progress" && (
                   <Badge variant="secondary" className="mt-1.5 text-xs">
                     In Progress
