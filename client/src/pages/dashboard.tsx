@@ -1,34 +1,13 @@
-import { StatCard } from "@/components/stat-card";
 import { TaskCard } from "@/components/task-card";
 import { RoleTimeline } from "@/components/role-timeline";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  ClipboardList,
-  CheckCircle2,
-  Clock,
-  Users,
-  TrendingUp,
   Target,
+  Calendar,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 import { format } from "date-fns";
 
 export default function Dashboard() {
-  const chartData = [
-    { name: "Mon", tasks: 4 },
-    { name: "Tue", tasks: 7 },
-    { name: "Wed", tasks: 5 },
-    { name: "Thu", tasks: 9 },
-    { name: "Fri", tasks: 6 },
-  ];
 
   const recentTasks = [
     {
@@ -108,95 +87,20 @@ export default function Dashboard() {
           Dashboard
         </h1>
         <p className="text-muted-foreground mt-1">
-          Overview of your club's activities and progress
+          Track role progress and upcoming activities
         </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Tasks"
-          value={42}
-          icon={ClipboardList}
-          description="from last month"
-          trend="+12%"
-        />
-        <StatCard
-          title="In Progress"
-          value={18}
-          icon={Clock}
-          description="active tasks"
-        />
-        <StatCard
-          title="Completed"
-          value={24}
-          icon={CheckCircle2}
-          description="this month"
-          trend="+8%"
-        />
-        <StatCard
-          title="Team Members"
-          value={8}
-          icon={Users}
-          description="active executives"
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Task Completion This Week
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis
-                  dataKey="name"
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                />
-                <YAxis
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--popover))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "6px",
-                  }}
-                />
-                <Bar dataKey="tasks" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentTasks.map((task) => (
-              <TaskCard key={task.id} {...task} />
-            ))}
-          </CardContent>
-        </Card>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5" />
-            Role Timeline Progress
+            Team Role Progress
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Track where each executive is in their role-specific task timeline
+            See where each executive is in their role-specific task timeline
           </p>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {roleTimelines.map((timeline) => (
@@ -208,34 +112,50 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Deadlines</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentTasks
-              .filter((t) => t.status !== "completed")
-              .map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  data-testid={`deadline-${task.id}`}
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Assigned to {task.assignee.name}
-                    </p>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recentTasks.map((task) => (
+              <TaskCard key={task.id} {...task} />
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Upcoming Deadlines
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentTasks
+                .filter((t) => t.status !== "completed")
+                .map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    data-testid={`deadline-${task.id}`}
+                  >
+                    <div className="flex-1">
+                      <h4 className="font-medium">{task.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Assigned to {task.assignee.name}
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {task.deadline && format(task.deadline, "MMM d, yyyy")}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {task.deadline && format(task.deadline, "MMM d, yyyy")}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
