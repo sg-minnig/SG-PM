@@ -36,6 +36,7 @@ export const teamMembers = pgTable("team_members", {
   advisor: text("advisor"),
   email: text("email").notNull().unique(), // Used to link to user account
   avatarColor: text("avatar_color").notNull(),
+  profileImageUrl: text("profile_image_url"), // URL to uploaded profile image in object storage
   createdAt: timestamp("created_at").defaultNow(),
 });
 

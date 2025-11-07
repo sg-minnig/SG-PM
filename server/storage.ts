@@ -48,20 +48,22 @@ export class DatabaseStorage implements IStorage {
       email: userData.email?.toLowerCase().trim() || null,
     };
     
-    // Check if user already exists
-    const existing = await this.getUser(userData.id);
-    
-    if (existing) {
-      // Update existing user (preserve role)
-      const [user] = await db
-        .update(users)
-        .set({
-          ...normalizedData,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, userData.id))
-        .returning();
-      return user;
+    // Check if user already exists (only if id is provided)
+    if (userData.id) {
+      const existing = await this.getUser(userData.id);
+      
+      if (existing) {
+        // Update existing user (preserve role)
+        const [user] = await db
+          .update(users)
+          .set({
+            ...normalizedData,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, existing.id))
+          .returning();
+        return user;
+      }
     }
     
     // Check if this is the first user - they become president automatically

@@ -73,11 +73,6 @@ export function RoleTimeline({
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-sm">{memberName}</h4>
             <p className="text-xs text-muted-foreground">{role}</p>
-            {advisor && (
-              <p className="text-xs text-muted-foreground/80 mt-0.5">
-                Advisor: {advisor}
-              </p>
-            )}
           </div>
           <Badge variant="secondary" className="text-xs">
             {completedCount}/{tasks.length}

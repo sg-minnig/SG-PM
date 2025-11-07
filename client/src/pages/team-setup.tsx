@@ -1,5 +1,5 @@
 // Team setup page for presidents to create and manage team members
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { TeamMember } from "@shared/schema";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Trash2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Plus, Trash2, Upload, X } from "lucide-react";
 
 export default function TeamSetup() {
   const { user, isPresident } = useAuth();
@@ -22,7 +22,10 @@ export default function TeamSetup() {
     advisor: "",
     email: "",
     avatarColor: "#3b82f6",
+    profileImageUrl: null as string | null,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: teamMembers = [], isLoading } = useQuery<TeamMember[]>({
     queryKey: ["/api/team-members"],
@@ -45,6 +48,7 @@ export default function TeamSetup() {
         advisor: "",
         email: "",
         avatarColor: "#3b82f6",
+        profileImageUrl: null,
       });
       setIsAdding(false);
     },
@@ -73,6 +77,71 @@ export default function TeamSetup() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMemberMutation.mutate(newMember);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be under 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      // Get presigned upload URL
+      const response = await apiRequest(
+        "POST",
+        "/api/profile-image/upload-url",
+        {}
+      );
+      const data = await response.json() as { uploadURL: string; objectPath: string };
+      const { uploadURL, objectPath } = data;
+
+      // Upload file to object storage
+      const uploadResponse = await fetch(uploadURL, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Upload failed");
+      }
+
+      // Update member data with image path
+      setNewMember({ ...newMember, profileImageUrl: objectPath });
+      
+      toast({
+        title: "Image uploaded",
+        description: "Profile image uploaded successfully.",
+      });
+    } catch (error) {
+      console.error("Image upload error:", error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const colors = [
@@ -159,7 +228,62 @@ export default function TeamSetup() {
               </div>
 
               <div className="space-y-2">
-                <Label>Avatar Color</Label>
+                <Label>Profile Photo (optional)</Label>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20" style={{ backgroundColor: newMember.avatarColor }}>
+                    {newMember.profileImageUrl ? (
+                      <AvatarImage src={newMember.profileImageUrl} alt={newMember.name} />
+                    ) : (
+                      <AvatarFallback
+                        style={{ backgroundColor: newMember.avatarColor, color: "white" }}
+                        className="text-2xl font-medium"
+                      >
+                        {newMember.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2) || "?"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      data-testid="button-upload-image"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploadingImage ? "Uploading..." : "Upload Photo"}
+                    </Button>
+                    {newMember.profileImageUrl && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setNewMember({ ...newMember, profileImageUrl: null })}
+                        data-testid="button-remove-image"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Avatar Color (used if no photo uploaded)</Label>
                 <div className="flex gap-3">
                   {colors.map((color) => (
                     <button
@@ -177,8 +301,8 @@ export default function TeamSetup() {
               </div>
 
               <div className="flex gap-3">
-                <Button type="submit" disabled={createMemberMutation.isPending} data-testid="button-save-member">
-                  {createMemberMutation.isPending ? "Adding..." : "Add Member"}
+                <Button type="submit" disabled={createMemberMutation.isPending || uploadingImage} data-testid="button-save-member">
+                  {createMemberMutation.isPending ? "Adding..." : uploadingImage ? "Uploading image..." : "Add Member"}
                 </Button>
                 <Button
                   type="button"
@@ -216,17 +340,21 @@ export default function TeamSetup() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12" style={{ backgroundColor: member.avatarColor }}>
-                      <AvatarFallback
-                        style={{ backgroundColor: member.avatarColor, color: "white" }}
-                        className="text-sm font-medium"
-                      >
-                        {member.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </AvatarFallback>
+                      {member.profileImageUrl ? (
+                        <AvatarImage src={member.profileImageUrl} alt={member.name} />
+                      ) : (
+                        <AvatarFallback
+                          style={{ backgroundColor: member.avatarColor, color: "white" }}
+                          className="text-sm font-medium"
+                        >
+                          {member.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div>
                       <h3 className="font-semibold">{member.name}</h3>
