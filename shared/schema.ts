@@ -17,6 +17,16 @@ export const teamMembers = pgTable("team_members", {
   avatarColor: text("avatar_color").notNull(),
 });
 
+export const customTimelineTasks = pgTable("custom_timeline_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull(),
+  title: text("title").notNull(),
+  status: text("status").notNull(),
+  order: text("order").notNull(),
+  isCustom: boolean("is_custom").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -58,6 +68,12 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   uploadedAt: true,
 });
 
+export const insertCustomTimelineTaskSchema = createInsertSchema(customTimelineTasks).omit({
+  id: true,
+  createdAt: true,
+  isCustom: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type TeamMember = typeof teamMembers.$inferSelect;
@@ -66,3 +82,5 @@ export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type CustomTimelineTask = typeof customTimelineTasks.$inferSelect;
+export type InsertCustomTimelineTask = z.infer<typeof insertCustomTimelineTaskSchema>;
