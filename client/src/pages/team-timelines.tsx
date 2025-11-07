@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { RoleTimeline } from "@/components/role-timeline";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { CustomTimelineTask } from "@shared/schema";
 
 interface TimelineTask {
   id: string;
@@ -18,21 +20,23 @@ interface RoleTimelineData {
 }
 
 export default function TeamTimelines() {
-  const [customTasks, setCustomTasks] = useState<Record<string, TimelineTask[]>>({});
+  const addTaskMutation = useMutation({
+    mutationFn: async (data: { memberId: string; title: string; status: string; order: string }) => {
+      const response = await apiRequest('POST', '/api/timeline-tasks', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/timeline-tasks'] });
+    },
+  });
 
   const handleAddTask = (memberId: string) => (task: { title: string; status: string; order: number }) => {
-    const newTask: TimelineTask = {
-      id: `custom-${Date.now()}`,
+    addTaskMutation.mutate({
+      memberId,
       title: task.title,
-      status: task.status as "completed" | "in-progress" | "upcoming",
-      order: task.order,
-      isCustom: true,
-    };
-
-    setCustomTasks(prev => ({
-      ...prev,
-      [memberId]: [...(prev[memberId] || []), newTask],
-    }));
+      status: task.status,
+      order: task.order.toString(),
+    });
   };
 
   const baseRoleTimelines: RoleTimelineData[] = [
@@ -126,8 +130,19 @@ export default function TeamTimelines() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {baseRoleTimelines.map((timeline) => {
-          const memberCustomTasks = customTasks[timeline.memberId] || [];
-          const allTasks = [...timeline.tasks, ...memberCustomTasks].sort((a, b) => a.order - b.order);
+          const { data: customTasksData } = useQuery<CustomTimelineTask[]>({
+            queryKey: ['/api/timeline-tasks', timeline.memberId],
+          });
+
+          const customTasks: TimelineTask[] = (customTasksData || []).map(task => ({
+            id: task.id,
+            title: task.title,
+            status: task.status as "completed" | "in-progress" | "upcoming",
+            order: parseFloat(task.order),
+            isCustom: true,
+          }));
+
+          const allTasks = [...timeline.tasks, ...customTasks].sort((a, b) => a.order - b.order);
 
           return (
             <div key={timeline.memberName} className="border-0 shadow-sm">

@@ -22,7 +22,7 @@ export const customTimelineTasks = pgTable("custom_timeline_tasks", {
   memberId: varchar("member_id").notNull(),
   title: text("title").notNull(),
   status: text("status").notNull(),
-  order: text("order").notNull(),
+  order: varchar("order").notNull(),
   isCustom: boolean("is_custom").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
