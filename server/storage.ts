@@ -48,7 +48,7 @@ export class DatabaseStorage implements IStorage {
       email: userData.email?.toLowerCase().trim() || null,
     };
     
-    // Check if user already exists (only if id is provided)
+    // First try to find user by ID
     if (userData.id) {
       const existing = await this.getUser(userData.id);
       
@@ -61,6 +61,27 @@ export class DatabaseStorage implements IStorage {
             updatedAt: new Date(),
           })
           .where(eq(users.id, existing.id))
+          .returning();
+        return user;
+      }
+    }
+    
+    // Check if user exists by email (case-insensitive)
+    if (normalizedData.email) {
+      const [existingByEmail] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, normalizedData.email));
+      
+      if (existingByEmail) {
+        // Update existing user found by email
+        const [user] = await db
+          .update(users)
+          .set({
+            ...normalizedData,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.email, normalizedData.email))
           .returning();
         return user;
       }
