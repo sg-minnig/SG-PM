@@ -242,21 +242,19 @@
   body {
     @apply text-foreground font-sans antialiased;
     background: linear-gradient(135deg, 
-      hsl(330, 100%, 97%) 0%, 
-      hsl(210, 100%, 97%) 25%, 
-      hsl(270, 100%, 97%) 50%, 
-      hsl(180, 100%, 97%) 75%, 
-      hsl(50, 100%, 97%) 100%);
+      hsl(0, 90%, 70%) 0%,
+      hsl(50, 95%, 65%) 33%,
+      hsl(220, 85%, 68%) 66%,
+      hsl(0, 88%, 72%) 100%);
     background-attachment: fixed;
   }
 
   .dark body {
     background: linear-gradient(135deg, 
-      hsl(330, 40%, 12%) 0%, 
-      hsl(240, 40%, 11%) 25%, 
-      hsl(270, 35%, 12%) 50%, 
-      hsl(200, 40%, 11%) 75%, 
-      hsl(220, 45%, 11%) 100%);
+      hsl(0, 80%, 28%) 0%,
+      hsl(50, 85%, 32%) 33%,
+      hsl(220, 75%, 30%) 66%,
+      hsl(0, 78%, 30%) 100%);
     background-attachment: fixed;
   }
 }
@@ -368,28 +366,24 @@
     inset: -1px;
   }
 
-  /* Pastel rainbow gradient for landing page */
+  /* Primary color gradient for landing page */
   .pastel-rainbow {
     background: linear-gradient(
       135deg,
-      #fef3c7 0%,
-      #fce7f3 20%,
-      #e9d5ff 40%,
-      #d1fae5 60%,
-      #bfdbfe 80%,
-      #e0e7ff 100%
+      hsl(0, 90%, 70%) 0%,
+      hsl(50, 95%, 65%) 33%,
+      hsl(220, 85%, 68%) 66%,
+      hsl(0, 88%, 72%) 100%
     );
   }
 
   .dark .pastel-rainbow {
     background: linear-gradient(
       135deg,
-      #fde68a 0%,
-      #f9a8d4 20%,
-      #ddd6fe 40%,
-      #a7f3d0 60%,
-      #93c5fd 80%,
-      #c7d2fe 100%
+      hsl(0, 80%, 28%) 0%,
+      hsl(50, 85%, 32%) 33%,
+      hsl(220, 75%, 30%) 66%,
+      hsl(0, 78%, 30%) 100%
     );
   }
 }
