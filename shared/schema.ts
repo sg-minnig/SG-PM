@@ -57,21 +57,27 @@ export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").notNull(),
+  status: text("status").notNull().default("pending"),
+  position: text("position"), // Which role/position this task is for
   assigneeId: varchar("assignee_id"),
   deadline: timestamp("deadline"),
-  priority: text("priority").notNull(),
+  priority: text("priority").notNull().default("medium"),
   documentId: varchar("document_id"),
   aiGenerated: boolean("ai_generated").default(false),
   approved: boolean("approved").default(false),
+  order: varchar("order"), // For timeline ordering
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const documents = pgTable("documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  position: text("position").notNull(), // Which role/position this document is for
+  fileUrl: text("file_url").notNull(), // Object storage URL
+  content: text("content"), // Extracted text content for AI processing
   size: text("size").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploadedBy: varchar("uploaded_by"), // User ID who uploaded
   analyzed: boolean("analyzed").default(false),
 });
 

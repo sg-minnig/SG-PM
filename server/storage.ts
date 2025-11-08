@@ -3,12 +3,18 @@ import {
   users,
   teamMembers,
   customTimelineTasks,
+  documents,
+  tasks,
   type User,
   type UpsertUser,
   type TeamMember,
   type InsertTeamMember,
   type CustomTimelineTask,
   type InsertCustomTimelineTask,
+  type Document,
+  type InsertDocument,
+  type Task,
+  type InsertTask,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -32,6 +38,23 @@ export interface IStorage {
   createCustomTimelineTask(task: InsertCustomTimelineTask): Promise<CustomTimelineTask>;
   updateCustomTimelineTask(id: string, task: Partial<InsertCustomTimelineTask>): Promise<CustomTimelineTask | undefined>;
   deleteCustomTimelineTask(id: string): Promise<boolean>;
+  
+  // Documents
+  getDocuments(): Promise<Document[]>;
+  getDocumentById(id: string): Promise<Document | undefined>;
+  getDocumentsByPosition(position: string): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  updateDocument(id: string, updates: Partial<InsertDocument>): Promise<Document | undefined>;
+  deleteDocument(id: string): Promise<boolean>;
+  
+  // Tasks
+  getTasks(): Promise<Task[]>;
+  getTaskById(id: string): Promise<Task | undefined>;
+  getTasksByPosition(position: string): Promise<Task[]>;
+  getTasksByDocumentId(documentId: string): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: string, updates: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -184,6 +207,76 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCustomTimelineTask(id: string): Promise<boolean> {
     const result = await db.delete(customTimelineTasks).where(eq(customTimelineTasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Documents
+  async getDocuments(): Promise<Document[]> {
+    return await db.select().from(documents);
+  }
+
+  async getDocumentById(id: string): Promise<Document | undefined> {
+    const [document] = await db.select().from(documents).where(eq(documents.id, id));
+    return document;
+  }
+
+  async getDocumentsByPosition(position: string): Promise<Document[]> {
+    return await db.select().from(documents).where(eq(documents.position, position));
+  }
+
+  async createDocument(documentData: InsertDocument): Promise<Document> {
+    const [document] = await db.insert(documents).values(documentData).returning();
+    return document;
+  }
+
+  async updateDocument(id: string, updates: Partial<InsertDocument>): Promise<Document | undefined> {
+    const [document] = await db
+      .update(documents)
+      .set(updates)
+      .where(eq(documents.id, id))
+      .returning();
+    return document;
+  }
+
+  async deleteDocument(id: string): Promise<boolean> {
+    const result = await db.delete(documents).where(eq(documents.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return await db.select().from(tasks);
+  }
+
+  async getTaskById(id: string): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task;
+  }
+
+  async getTasksByPosition(position: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.position, position));
+  }
+
+  async getTasksByDocumentId(documentId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.documentId, documentId));
+  }
+
+  async createTask(taskData: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(taskData).returning();
+    return task;
+  }
+
+  async updateTask(id: string, updates: Partial<InsertTask>): Promise<Task | undefined> {
+    const [task] = await db
+      .update(tasks)
+      .set(updates)
+      .where(eq(tasks.id, id))
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: string): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 }
