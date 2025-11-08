@@ -185,18 +185,19 @@ Preferred communication style: Simple, everyday language.
 - Documents page visible only to presidents
 - Task Review page visible only to presidents (accessible via sidebar)
 
-### Visual Design: Vibrant Primary Color Gradient
+### Visual Design: Lovable-Inspired Gradient
 
-**Design Update**: Updated the application's background gradient from soft pastels to a vibrant primary color scheme inspired by LovableDev.
+**Design Update**: Updated the application's background gradient to match the Lovable aesthetic with soft, luminous blue-purple-pink-orange transitions.
 
 **Color Palette**:
-- **Light Mode**: Flows through red (0°) → yellow (50°) → blue (220°) → red (0°) with 65-72% lightness for rich, energetic colors
-- **Dark Mode**: Uses the same hue progression with 28-32% lightness for deep, vivid tones that maintain readability
+- **Light Mode**: Flows through blue (230°) → purple (280°) → pink (330°) → coral (15°) → blue (220°) with 84-90% lightness for a soft, dreamy appearance
+- **Dark Mode**: Same hue progression with 15-20% lightness for deep, sophisticated tones that maintain readability
 
 **Implementation**:
 - Updated `body` gradient in `client/src/index.css` for global background
 - Updated `.pastel-rainbow` class for landing page consistency
-- High saturation (75-95%) creates bold, eye-catching aesthetics
+- Full saturation (100%) in light mode creates luminous, glowing aesthetics
+- 60% saturation in dark mode for refined elegance
 - Smooth 135° diagonal gradient with evenly spaced color stops
 - Maintains strong text contrast in both light and dark themes
 
@@ -204,3 +205,4 @@ Preferred communication style: Simple, everyday language.
 - Uses HSL color model for precise control over hue, saturation, and lightness
 - `background-attachment: fixed` keeps gradient stationary during scrolling
 - Consistent gradient applied across both landing page and authenticated views
+- Inspired by Lovable's signature gradient design
