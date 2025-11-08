@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, Users, Calendar, CheckCircle2 } from "lucide-react";
+import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4_1762565937039.png";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -14,9 +15,11 @@ export default function Landing() {
       <header className="px-8 py-6 border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Target className="h-6 w-6 text-primary" />
-            </div>
+            <img 
+              src={logoImage} 
+              alt="TaskFlow Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <h1 className="text-xl font-semibold">TaskFlow</h1>
           </div>
           <Button onClick={handleLogin} data-testid="button-login">

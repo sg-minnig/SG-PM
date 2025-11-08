@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4_1762565937039.png";
 
 const baseMenuItems = [
   {
@@ -98,9 +99,11 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <ClipboardList className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img 
+            src={logoImage} 
+            alt="TaskFlow Logo" 
+            className="h-8 w-8 object-contain"
+          />
           <div>
             <h2 className="text-base font-semibold text-sidebar-foreground">TaskFlow</h2>
             <p className="text-xs text-muted-foreground">Club Executive Manager</p>
