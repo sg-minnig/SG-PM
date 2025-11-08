@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4_1762565937039.png";
+import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4-removebg-preview_1762566106604.png";
 
 const baseMenuItems = [
   {

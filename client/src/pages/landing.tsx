@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, Users, Calendar, CheckCircle2 } from "lucide-react";
-import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4_1762565937039.png";
+import logoImage from "@assets/30919374-809c-459f-a8a3-07e75b17bfe4-removebg-preview_1762566106604.png";
 
 export default function Landing() {
   const handleLogin = () => {
