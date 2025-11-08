@@ -24,15 +24,16 @@ export const objectStorageClient = new Storage({
 });
 
 export class ObjectStorageService {
-  // Get presigned URL for uploading a profile image
-  async getProfileImageUploadURL(): Promise<{ uploadURL: string; objectPath: string }> {
+  // Get presigned URL for uploading a profile image (bound to user)
+  async getProfileImageUploadURL(userId: string): Promise<{ uploadURL: string; objectPath: string }> {
     const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
     if (!privateObjectDir) {
       throw new Error("PRIVATE_OBJECT_DIR not set");
     }
 
+    // Use userId in the path to bind uploads to specific users
     const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/profile-images/${objectId}`;
+    const fullPath = `${privateObjectDir}/profile-images/${userId}/${objectId}`;
 
     const { bucketName, objectName } = this.parseObjectPath(fullPath);
     const uploadURL = await this.signObjectURL({
@@ -44,7 +45,7 @@ export class ObjectStorageService {
 
     return {
       uploadURL,
-      objectPath: `/objects/profile-images/${objectId}`,
+      objectPath: `/objects/profile-images/${userId}/${objectId}`,
     };
   }
 

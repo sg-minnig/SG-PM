@@ -48,10 +48,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile image upload routes
-  app.post("/api/profile-image/upload-url", isAuthenticated, async (req, res) => {
+  app.post("/api/profile-image/upload-url", isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
       const objectStorage = new ObjectStorageService();
-      const { uploadURL, objectPath } = await objectStorage.getProfileImageUploadURL();
+      const { uploadURL, objectPath } = await objectStorage.getProfileImageUploadURL(userId);
       res.json({ uploadURL, objectPath });
     } catch (error) {
       console.error("Error getting upload URL:", error);
@@ -59,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve uploaded profile images
+  // Serve uploaded profile images (public access for viewing)
   app.get("/objects/:objectPath(*)", async (req, res) => {
     try {
       const objectPath = `/objects/${req.params.objectPath}`;
@@ -79,20 +80,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bucket = objectStorageClient.bucket(objectInfo.bucket);
       const file = bucket.file(objectInfo.file);
       
-      // Get metadata
+      // Get metadata and validate server-side
       const [metadata] = await file.getMetadata();
       
-      // Validate it's an image
+      // Server-side validation: Ensure it's an image
       if (!metadata.contentType?.startsWith("image/")) {
         return res.status(400).json({ error: "Not an image file" });
       }
 
-      // Validate file size (5MB max)
+      // Server-side validation: Enforce 5MB size limit
       if (metadata.size && Number(metadata.size) > 5 * 1024 * 1024) {
         return res.status(400).json({ error: "File too large" });
       }
       
-      // Set cache headers
+      // Profile images are public - anyone can view them
+      // Set cache headers for public access
       res.set({
         "Content-Type": metadata.contentType,
         "Content-Length": metadata.size,
@@ -117,14 +119,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/team-members", isAuthenticated, isPresident, async (req, res) => {
+  app.post("/api/team-members", isAuthenticated, isPresident, async (req: any, res) => {
     try {
       const validatedData = insertTeamMemberSchema.parse(req.body);
+      const userId = req.user.claims.sub;
       
       // Security: Validate profileImageUrl if provided
       if (validatedData.profileImageUrl) {
         if (!validatedData.profileImageUrl.startsWith("/objects/profile-images/")) {
           return res.status(400).json({ error: "Invalid profile image URL" });
+        }
+        // Presidents can only set images they uploaded themselves
+        if (!validatedData.profileImageUrl.includes(`/profile-images/${userId}/`)) {
+          return res.status(403).json({ error: "You can only use images you uploaded" });
         }
       }
       
@@ -156,6 +163,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (validatedData.profileImageUrl) {
         if (!validatedData.profileImageUrl.startsWith("/objects/profile-images/")) {
           return res.status(400).json({ error: "Invalid profile image URL" });
+        }
+        // Users can only set images they uploaded (path must contain their userId)
+        if (!validatedData.profileImageUrl.includes(`/profile-images/${userId}/`)) {
+          return res.status(403).json({ error: "You can only use images you uploaded" });
         }
       }
       
