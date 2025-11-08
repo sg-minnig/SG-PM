@@ -101,11 +101,11 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <img 
             src={logoImage} 
-            alt="TaskFlow Logo" 
+            alt="ChapterOps Logo" 
             className="h-8 w-8 object-contain"
           />
           <div>
-            <h2 className="text-base font-semibold text-sidebar-foreground">TaskFlow</h2>
+            <h2 className="text-base font-semibold text-sidebar-foreground">ChapterOps</h2>
             <p className="text-xs text-muted-foreground">Club Executive Manager</p>
           </div>
         </div>
