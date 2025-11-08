@@ -19,9 +19,11 @@ export default function TeamSetup() {
   const [newMember, setNewMember] = useState({
     name: "",
     position: "",
+    email: "",
+    phone: "",
+    instagram: "",
     advisorName: "",
     advisorEmail: "",
-    email: "",
     avatarColor: "#3b82f6",
     profileImageUrl: null as string | null,
   });
@@ -46,9 +48,11 @@ export default function TeamSetup() {
       setNewMember({
         name: "",
         position: "",
+        email: "",
+        phone: "",
+        instagram: "",
         advisorName: "",
         advisorEmail: "",
-        email: "",
         avatarColor: "#3b82f6",
         profileImageUrl: null,
       });
@@ -218,6 +222,27 @@ export default function TeamSetup() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={newMember.phone}
+                    onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                    data-testid="input-member-phone"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram">Instagram Handle</Label>
+                  <Input
+                    id="instagram"
+                    value={newMember.instagram}
+                    onChange={(e) => setNewMember({ ...newMember, instagram: e.target.value })}
+                    placeholder="@username"
+                    data-testid="input-member-instagram"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="advisorName">Advisor Name</Label>
                   <Input
                     id="advisorName"
@@ -372,14 +397,6 @@ export default function TeamSetup() {
                     <div>
                       <h3 className="font-semibold">{member.name}</h3>
                       <p className="text-sm text-muted-foreground">{member.position}</p>
-                      {member.advisorName && (
-                        <div className="text-xs text-muted-foreground/80 mt-1 space-y-0.5">
-                          <p>Advisor: {member.advisorName}</p>
-                          {member.advisorEmail && (
-                            <p className="truncate">{member.advisorEmail}</p>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                   <Button
@@ -392,9 +409,21 @@ export default function TeamSetup() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {member.email}
+                
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>{member.email}</p>
+                  {member.phone && <p>{member.phone}</p>}
+                  {member.instagram && <p>{member.instagram}</p>}
                 </div>
+
+                {member.advisorName && (
+                  <div className="text-xs text-muted-foreground/80 pt-2 border-t border-border space-y-0.5">
+                    <p>Advisor: {member.advisorName}</p>
+                    {member.advisorEmail && (
+                      <p className="truncate">{member.advisorEmail}</p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, User2 } from "lucide-react";
+import { Mail, User2, Phone, Instagram } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { TeamMember } from "@shared/schema";
 
@@ -81,6 +81,29 @@ export default function Team() {
                       {member.email}
                     </span>
                   </div>
+
+                  {member.phone && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground w-full">
+                      <Phone className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-xs truncate">
+                        {member.phone}
+                      </span>
+                    </div>
+                  )}
+
+                  {member.instagram && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground w-full">
+                      <Instagram className="h-3 w-3 flex-shrink-0" />
+                      <a 
+                        href={`https://instagram.com/${member.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs truncate hover:text-primary transition-colors"
+                      >
+                        {member.instagram}
+                      </a>
+                    </div>
+                  )}
 
                   {member.advisorName && (
                     <div className="flex flex-col gap-0.5 text-sm text-muted-foreground/80 w-full pt-1 border-t border-border">
