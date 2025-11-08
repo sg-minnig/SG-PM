@@ -50,7 +50,7 @@
 
   --popover-border: 220 13% 91%;
 
-  --primary: 0deg 100% 70.59%;
+  --primary: 195.12deg 95.35% 74.71%;
 
   --primary-foreground: 0 0% 100%;
 
@@ -66,7 +66,7 @@
 
   --accent-foreground: 220 13% 13%;
 
-  --destructive: 0deg 100% 70.59%;
+  --destructive: 195.12deg 95.35% 74.71%;
 
   --destructive-foreground: 0 0% 100%;
 
@@ -78,7 +78,7 @@
   --chart-4: 0deg 100% 76.08%;
   --chart-5: 53.53deg 100% 80%;
 
-  --font-sans: 'Raleway', sans-serif;
+  --font-sans: 'PT Serif', serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Menlo', monospace;
   --radius: .5rem; /* 8px */
