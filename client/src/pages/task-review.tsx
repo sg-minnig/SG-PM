@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,93 +13,115 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, CheckCircle2, XCircle, Edit2, FileText } from "lucide-react";
+import { Sparkles, CheckCircle2, XCircle, Edit2, FileText, Trash2 } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { Task, Document as DocType } from "@shared/schema";
 
-interface AIGeneratedTask {
+interface TeamMember {
   id: string;
-  title: string;
-  description: string;
-  suggestedAssignee: string;
-  suggestedDeadline: string;
-  priority: string;
-  approved: boolean | null;
+  name: string;
+  position: string;
 }
 
 export default function TaskReview() {
-  const [selectedDoc] = useState("2023-2024_Transition_Document.pdf");
-  const [tasks, setTasks] = useState<AIGeneratedTask[]>([
-    {
-      id: "1",
-      title: "Schedule first executive meeting",
-      description: "Coordinate calendars and book meeting room for initial team planning session",
-      suggestedAssignee: "Alex Chen",
-      suggestedDeadline: "2024-12-15",
-      priority: "high",
-      approved: null,
-    },
-    {
-      id: "2",
-      title: "Review last year's budget allocation",
-      description: "Analyze previous year's spending to inform current budget planning",
-      suggestedAssignee: "Sam Wilson",
-      suggestedDeadline: "2024-12-18",
-      priority: "high",
-      approved: null,
-    },
-    {
-      id: "3",
-      title: "Update club constitution",
-      description: "Review and revise club bylaws based on transition document recommendations",
-      suggestedAssignee: "Jordan Lee",
-      suggestedDeadline: "2024-12-25",
-      priority: "medium",
-      approved: null,
-    },
-    {
-      id: "4",
-      title: "Reach out to community partners",
-      description: "Contact organizations mentioned in handover notes to maintain partnerships",
-      suggestedAssignee: "Riley Martinez",
-      suggestedDeadline: "2024-12-20",
-      priority: "medium",
-      approved: null,
-    },
-  ]);
-
+  const { toast } = useToast();
   const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [editedData, setEditedData] = useState<{
+    title: string;
+    description: string;
+    priority: string;
+  } | null>(null);
 
-  const handleApprove = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, approved: true } : task
-      )
-    );
-    console.log("Task approved:", taskId);
+  // Fetch AI-generated tasks
+  const { data: tasks = [], isLoading } = useQuery<Task[]>({
+    queryKey: ["/api/tasks"],
+  });
+
+  // Fetch documents
+  const { data: documents = [] } = useQuery<DocType[]>({
+    queryKey: ["/api/documents"],
+  });
+
+  // Fetch team members
+  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
+    queryKey: ["/api/team-members"],
+  });
+
+  // Filter for AI-generated tasks only
+  const aiTasks = tasks.filter(task => task.aiGenerated);
+  const pendingTasks = aiTasks.filter(task => !task.approved);
+  const approvedTasks = aiTasks.filter(task => task.approved);
+
+  // Approve task mutation
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates?: Partial<Task> }) => {
+      return await apiRequest(`/api/tasks/${id}`, "PATCH", {
+        ...updates,
+        approved: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      setEditingTask(null);
+      setEditedData(null);
+      toast({
+        title: "Task Approved",
+        description: "Task has been added to timelines",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Approval Failed",
+        description: "Failed to approve task",
+      });
+    },
+  });
+
+  // Delete task mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await apiRequest(`/api/tasks/${taskId}`, "DELETE", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Task Rejected",
+        description: "Task has been removed",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Rejection Failed",
+        description: "Failed to reject task",
+      });
+    },
+  });
+
+  const handleApprove = (task: Task) => {
+    const updates = editingTask === task.id && editedData ? editedData : {};
+    approveMutation.mutate({ id: task.id, updates });
   };
 
   const handleReject = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, approved: false } : task
-      )
-    );
-    console.log("Task rejected:", taskId);
+    deleteMutation.mutate(taskId);
   };
 
-  const handleEdit = (taskId: string) => {
-    setEditingTask(editingTask === taskId ? null : taskId);
+  const handleEdit = (task: Task) => {
+    if (editingTask === task.id) {
+      setEditingTask(null);
+      setEditedData(null);
+    } else {
+      setEditingTask(task.id);
+      setEditedData({
+        title: task.title,
+        description: task.description || "",
+        priority: task.priority,
+      });
+    }
   };
-
-  const teamMembers = [
-    "Alex Chen",
-    "Jordan Lee",
-    "Sam Wilson",
-    "Taylor Kim",
-    "Morgan Davis",
-    "Casey Brown",
-    "Riley Martinez",
-    "Jamie Anderson",
-  ];
 
   return (
     <div className="space-y-6">
@@ -111,204 +134,195 @@ export default function TaskReview() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileText className="h-5 w-5" />
-              Document Preview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{selectedDoc}</span>
-              </div>
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                Analyzed
-              </Badge>
+      {isLoading ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Loading tasks...
+        </div>
+      ) : aiTasks.length === 0 ? (
+        <Card className="border-2 border-dashed">
+          <CardContent className="flex flex-col items-center justify-center min-h-72 p-12">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+              <Sparkles className="h-10 w-10 text-primary" />
             </div>
-
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-medium text-sm mb-2">Key Excerpts:</h4>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p className="p-3 bg-muted/50 rounded-md font-mono text-xs">
-                    "The incoming executive team should prioritize scheduling their
-                    first meeting within the first two weeks to establish communication
-                    and delegate responsibilities..."
-                  </p>
-                  <p className="p-3 bg-muted/50 rounded-md font-mono text-xs">
-                    "Budget review is critical - analyze last year's allocation to
-                    identify areas for improvement and ensure sustainable spending..."
-                  </p>
-                  <p className="p-3 bg-muted/50 rounded-md font-mono text-xs">
-                    "The club constitution needs updating to reflect recent policy
-                    changes. This should be completed before the end of Q1..."
-                  </p>
-                </div>
-              </div>
-            </div>
+            <h3 className="text-xl font-semibold mb-2">
+              No AI tasks yet
+            </h3>
+            <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
+              Upload documents and analyze them with AI to generate tasks
+            </p>
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-5">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-5 w-5" />
+                Analyzed Documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {documents.filter(doc => doc.analyzed).map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-medium truncate">{doc.name}</span>
+                  </div>
+                  <Badge variant="secondary" className="gap-1 flex-shrink-0">
+                    <Sparkles className="h-3 w-3" />
+                    {doc.position}
+                  </Badge>
+                </div>
+              ))}
+              {documents.filter(doc => doc.analyzed).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No analyzed documents yet
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-base">
-                <Sparkles className="h-5 w-5 text-primary" />
-                Generated Tasks ({tasks.length})
-              </span>
-              <Badge variant="outline">
-                {tasks.filter((t) => t.approved === true).length} approved
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {tasks.map((task) => (
-              <Card
-                key={task.id}
-                className={
-                  task.approved === true
-                    ? "border-chart-3"
-                    : task.approved === false
-                    ? "border-destructive opacity-60"
-                    : ""
-                }
-                data-testid={`card-ai-task-${task.id}`}
-              >
-                <CardContent className="p-4 space-y-3">
-                  {editingTask === task.id ? (
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor={`title-${task.id}`}>Title</Label>
-                        <Input
-                          id={`title-${task.id}`}
-                          defaultValue={task.title}
-                          data-testid={`input-task-title-${task.id}`}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`desc-${task.id}`}>Description</Label>
-                        <Textarea
-                          id={`desc-${task.id}`}
-                          defaultValue={task.description}
-                          rows={3}
-                          data-testid={`textarea-task-description-${task.id}`}
-                        />
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-base">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Generated Tasks ({aiTasks.length})
+                </span>
+                <Badge variant="outline">
+                  {approvedTasks.length} approved
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {aiTasks.map((task) => (
+                <Card
+                  key={task.id}
+                  className={
+                    task.approved
+                      ? "border-chart-3"
+                      : ""
+                  }
+                  data-testid={`card-ai-task-${task.id}`}
+                >
+                  <CardContent className="p-4 space-y-3">
+                    {editingTask === task.id ? (
+                      <div className="space-y-3">
                         <div className="space-y-2">
-                          <Label htmlFor={`assignee-${task.id}`}>Assignee</Label>
-                          <Select defaultValue={task.suggestedAssignee}>
-                            <SelectTrigger id={`assignee-${task.id}`}>
+                          <Label htmlFor={`title-${task.id}`}>Title</Label>
+                          <Input
+                            id={`title-${task.id}`}
+                            value={editedData?.title || ""}
+                            onChange={(e) => setEditedData(prev => prev ? { ...prev, title: e.target.value } : null)}
+                            data-testid={`input-task-title-${task.id}`}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`desc-${task.id}`}>Description</Label>
+                          <Textarea
+                            id={`desc-${task.id}`}
+                            value={editedData?.description || ""}
+                            onChange={(e) => setEditedData(prev => prev ? { ...prev, description: e.target.value } : null)}
+                            rows={3}
+                            data-testid={`textarea-task-description-${task.id}`}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`priority-${task.id}`}>Priority</Label>
+                          <Select 
+                            value={editedData?.priority || "medium"}
+                            onValueChange={(value) => setEditedData(prev => prev ? { ...prev, priority: value } : null)}
+                          >
+                            <SelectTrigger id={`priority-${task.id}`}>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {teamMembers.map((member) => (
-                                <SelectItem key={member} value={member}>
-                                  {member}
-                                </SelectItem>
-                              ))}
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="low">Low</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor={`deadline-${task.id}`}>Deadline</Label>
-                          <Input
-                            id={`deadline-${task.id}`}
-                            type="date"
-                            defaultValue={task.suggestedDeadline}
-                          />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-medium" data-testid={`text-ai-task-title-${task.id}`}>
+                            {task.title}
+                          </h4>
+                          <Badge
+                            variant={
+                              task.priority === "high"
+                                ? "destructive"
+                                : task.priority === "medium"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="text-xs flex-shrink-0"
+                          >
+                            {task.priority}
+                          </Badge>
+                        </div>
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground">
+                            {task.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {task.position}
+                          </Badge>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-medium" data-testid={`text-ai-task-title-${task.id}`}>
-                          {task.title}
-                        </h4>
-                        <Badge
-                          variant={
-                            task.priority === "high"
-                              ? "destructive"
-                              : task.priority === "medium"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className="text-xs"
+                    )}
+
+                    {!task.approved && (
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(task)}
+                          data-testid={`button-edit-${task.id}`}
                         >
-                          {task.priority}
-                        </Badge>
+                          <Edit2 className="h-3 w-3 mr-1" />
+                          {editingTask === task.id ? "Cancel" : "Edit"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleApprove(task)}
+                          disabled={approveMutation.isPending}
+                          data-testid={`button-approve-${task.id}`}
+                        >
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleReject(task.id)}
+                          disabled={deleteMutation.isPending}
+                          data-testid={`button-reject-${task.id}`}
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Reject
+                        </Button>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {task.description}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>
-                          <strong>Assignee:</strong> {task.suggestedAssignee}
-                        </span>
-                        <span>
-                          <strong>Deadline:</strong> {task.suggestedDeadline}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {task.approved === null && (
-                    <div className="flex items-center gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(task.id)}
-                        data-testid={`button-edit-${task.id}`}
-                      >
-                        <Edit2 className="h-3 w-3 mr-1" />
-                        {editingTask === task.id ? "Done" : "Edit"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handleApprove(task.id)}
-                        data-testid={`button-approve-${task.id}`}
-                      >
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleReject(task.id)}
-                        data-testid={`button-reject-${task.id}`}
-                      >
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
-
-                  {task.approved === true && (
-                    <Badge variant="outline" className="gap-1 border-chart-3 text-chart-3">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Approved
-                    </Badge>
-                  )}
-
-                  {task.approved === false && (
-                    <Badge variant="outline" className="gap-1 border-destructive text-destructive">
-                      <XCircle className="h-3 w-3" />
-                      Rejected
-                    </Badge>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+                    {task.approved && (
+                      <Badge variant="outline" className="gap-1 border-chart-3 text-chart-3">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Approved
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

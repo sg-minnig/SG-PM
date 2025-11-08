@@ -57,16 +57,22 @@ Preferred communication style: Simple, everyday language.
 - `/api/timeline-tasks` - POST create new custom timeline task
 - `/api/timeline-tasks/:id` - PATCH update task, DELETE remove task
 - `/api/profile-image/upload-url` - POST get presigned URL for profile image upload (authenticated, bound to user)
-- `/objects/:objectPath` - GET serve uploaded profile images with server-side validation
+- `/api/documents/upload-url` - POST get presigned URL for document upload (presidents only)
+- `/api/documents` - GET all documents, POST create document (presidents only)
+- `/api/documents/:id` - DELETE remove document (presidents only)
+- `/api/documents/:id/analyze` - POST trigger AI analysis to generate tasks (presidents only)
+- `/api/tasks` - GET all tasks, POST create task (presidents only)
+- `/api/tasks/:id` - PATCH update task, DELETE remove task (presidents only)
+- `/objects/:objectPath` - GET serve uploaded files with server-side validation
 - `/api/team-members` - GET all members, POST create member (presidents only)
 - `/api/team-members/:id` - PATCH update member (own profile or president), DELETE remove member (presidents only)
 
 **Data Validation**: Zod schemas (shared between client/server via `@shared/schema`) for runtime type safety and validation.
 
 **Storage Layer**: 
-- Interface-based storage abstraction (`IStorage`) allowing multiple implementations
-- Current implementation: In-memory storage (`MemStorage`) using ES6 Maps
-- Designed to be swapped with database-backed storage (Drizzle ORM schemas defined for PostgreSQL migration)
+- Interface-based storage abstraction (`IStorage`) with methods for users, team members, tasks, documents, and timeline tasks
+- Current implementation: Database-backed storage (`DatabaseStorage`) using Drizzle ORM
+- PostgreSQL database via Neon serverless driver
 
 **Session Management**: Placeholder for connect-pg-simple session storage (configured but not actively used in current implementation).
 
@@ -78,8 +84,8 @@ Preferred communication style: Simple, everyday language.
 - `users` - User authentication (id, username, password, role, firstName, lastName, email)
 - `team_members` - Team member profiles (id, name, position, email, phone, instagram, advisorName, advisorEmail, avatarColor, profileImageUrl, userId)
 - `custom_timeline_tasks` - User-created timeline tasks (id, memberId, title, status, order, isCustom, createdAt)
-- `tasks` - Project tasks (id, title, description, status, assigneeId, deadline, priority, documentId, aiGenerated, approved, createdAt)
-- `documents` - Uploaded documents (id, name, size, uploadedAt, analyzed)
+- `tasks` - AI-generated and manual tasks (id, title, description, status, position, assigneeId, deadline, priority, documentId, aiGenerated, approved, order, createdAt)
+- `documents` - Uploaded transition documents (id, name, position, fileUrl, content, size, uploadedAt, uploadedBy, analyzed)
 
 **UUID Strategy**: PostgreSQL `gen_random_uuid()` for primary keys.
 
@@ -123,10 +129,58 @@ Preferred communication style: Simple, everyday language.
 - Runtime error overlay for development feedback
 
 **Object Storage**:
-- Replit Object Storage (Google Cloud Storage backend) for profile image uploads
+- Replit Object Storage (Google Cloud Storage backend) for profile images and documents
 - Presigned URL upload flow for secure direct-to-storage uploads
-- User-bound upload paths: `/objects/profile-images/{userId}/{uuid}`
-- Server-side validation: 5MB max size, image content-types only
-- Public read access for profile images, write access restricted to authenticated users
+- User-bound upload paths:
+  - Profile images: `/objects/profile-images/{userId}/{uuid}`
+  - Documents: `/objects/documents/{userId}/{uuid}-{filename}`
+- Server-side validation: 5MB max size for images, image content-types only
+- Public read access for profile images, documents restricted to authenticated users
+- Document upload supports .txt files with automatic text extraction OR manual content paste
 - ACL policy framework for future access control needs
-- File upload UI using Uppy (@uppy/core, @uppy/react, @uppy/dashboard, @uppy/aws-s3)
+
+## Recent Changes (November 2025)
+
+### AI-Powered Document Analysis and Task Generation
+
+**Feature Overview**: Presidents can upload transition documents, select which role/position the document pertains to, and trigger AI analysis to automatically generate role-specific tasks.
+
+**Document Upload Flow**:
+1. Presidents navigate to the Documents page (presidents only)
+2. Choose between:
+   - **File Upload**: Upload .txt files with automatic text extraction
+   - **Paste Content**: Manually paste document text and provide a name
+3. Select the target role/position (e.g., "President", "Treasurer", "VP Events")
+4. Document is uploaded to object storage and metadata stored in database
+
+**AI Analysis**:
+- Triggered manually by presidents via "Analyze with AI" button
+- Uses Anthropic Claude 3.5 Sonnet to analyze document content
+- Generates 5-15 actionable, role-specific tasks with:
+  - Title and description
+  - Priority level (high, medium, low)
+  - Automatic ordering
+- Tasks marked as `aiGenerated: true` and `approved: false`
+
+**Task Review Workflow**:
+1. Presidents navigate to Task Review page to see AI-generated tasks
+2. For each task, presidents can:
+   - **Edit**: Modify title, description, and priority
+   - **Approve**: Add task to role-specific timelines
+   - **Reject**: Delete task permanently
+3. Approved tasks appear in:
+   - Kanban board for the assigned position
+   - Role Timelines for team members in that position
+   - Task lists filtered by position
+
+**Technical Implementation**:
+- Frontend: Documents page with dual-mode upload (file/paste)
+- Frontend: Task Review page for approval workflow
+- Backend: Document storage with position assignment
+- Backend: AI integration using Anthropic SDK
+- Backend: Task CRUD operations with approval state management
+- Security: Presidents-only access, user-bound document uploads, server-side validation
+
+**Navigation**:
+- Documents page visible only to presidents
+- Task Review page visible only to presidents (accessible via sidebar)

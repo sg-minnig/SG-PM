@@ -9,6 +9,7 @@ import {
   UserPlus,
   LogOut,
   User,
+  Sparkles,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,16 +72,24 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { user, isPresident } = useAuth();
 
-  const presidentMenuItem = {
-    title: "Team Setup",
-    url: "/team-setup",
-    icon: UserPlus,
-    testId: "link-team-setup",
-  };
+  const presidentMenuItems = [
+    {
+      title: "Task Review",
+      url: "/task-review",
+      icon: Sparkles,
+      testId: "link-task-review",
+    },
+    {
+      title: "Team Setup",
+      url: "/team-setup",
+      icon: UserPlus,
+      testId: "link-team-setup",
+    },
+  ];
 
   const menuItems = isPresident
-    ? [...baseMenuItems, presidentMenuItem]
-    : baseMenuItems;
+    ? [...baseMenuItems, ...presidentMenuItems]
+    : baseMenuItems.filter(item => item.url !== "/documents"); // Hide Documents from non-presidents
 
   const handleLogout = () => {
     window.location.href = "/api/logout";

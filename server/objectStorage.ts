@@ -49,6 +49,32 @@ export class ObjectStorageService {
     };
   }
 
+  // Get presigned URL for uploading a document (bound to user)
+  async getDocumentUploadURL(userId: string, filename: string): Promise<{ uploadURL: string; objectPath: string }> {
+    const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
+    if (!privateObjectDir) {
+      throw new Error("PRIVATE_OBJECT_DIR not set");
+    }
+
+    // Use userId in the path to bind uploads to specific users
+    const objectId = randomUUID();
+    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fullPath = `${privateObjectDir}/documents/${userId}/${objectId}-${sanitizedFilename}`;
+
+    const { bucketName, objectName } = this.parseObjectPath(fullPath);
+    const uploadURL = await this.signObjectURL({
+      bucketName,
+      objectName,
+      method: "PUT",
+      ttlSec: 900, // 15 minutes
+    });
+
+    return {
+      uploadURL,
+      objectPath: `/objects/documents/${userId}/${objectId}-${sanitizedFilename}`,
+    };
+  }
+
   // Get file from object storage and stream to response
   async getObject(objectPath: string): Promise<{ bucket: string; file: string } | null> {
     if (!objectPath.startsWith("/objects/")) {
