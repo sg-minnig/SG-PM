@@ -184,3 +184,23 @@ Preferred communication style: Simple, everyday language.
 **Navigation**:
 - Documents page visible only to presidents
 - Task Review page visible only to presidents (accessible via sidebar)
+
+### Visual Design: Vibrant Primary Color Gradient
+
+**Design Update**: Updated the application's background gradient from soft pastels to a vibrant primary color scheme inspired by LovableDev.
+
+**Color Palette**:
+- **Light Mode**: Flows through red (0°) → yellow (50°) → blue (220°) → red (0°) with 65-72% lightness for rich, energetic colors
+- **Dark Mode**: Uses the same hue progression with 28-32% lightness for deep, vivid tones that maintain readability
+
+**Implementation**:
+- Updated `body` gradient in `client/src/index.css` for global background
+- Updated `.pastel-rainbow` class for landing page consistency
+- High saturation (75-95%) creates bold, eye-catching aesthetics
+- Smooth 135° diagonal gradient with evenly spaced color stops
+- Maintains strong text contrast in both light and dark themes
+
+**Technical Details**:
+- Uses HSL color model for precise control over hue, saturation, and lightness
+- `background-attachment: fixed` keeps gradient stationary during scrolling
+- Consistent gradient applied across both landing page and authenticated views
