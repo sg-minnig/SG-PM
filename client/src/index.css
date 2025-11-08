@@ -18,7 +18,7 @@
 
   --background: 0 0% 100%;
 
-  --foreground: 220 13% 9%;
+  --foreground: 220deg 13.04% 9.02%;
 
   --border: 220 13% 92%;
 
@@ -50,7 +50,7 @@
 
   --popover-border: 220 13% 91%;
 
-  --primary: 26.35deg 100% 70.98%;
+  --primary: 0deg 100% 78.04%;
 
   --primary-foreground: 0 0% 100%;
 
@@ -66,14 +66,14 @@
 
   --accent-foreground: 220 13% 13%;
 
-  --destructive: 27.06deg 100% 60%;
+  --destructive: 0deg 100% 78.04%;
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 220 13% 91%;
-  --ring: 27.06deg 100% 60%;
+  --input: 220deg 13.04% 90.98%;
+  --ring: 0deg 100% 78.04%;
   --chart-1: 220.44deg 100% 73.53%;
-  --chart-2: 261.23deg 100% 74.51%;
+  --chart-2: 262.11deg 29.23% 87.25%;
   --chart-3: 34.02deg 100% 61.96%;
   --chart-4: 0deg 100% 76.08%;
   --chart-5: 53.53deg 100% 80%;
