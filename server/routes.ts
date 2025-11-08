@@ -283,46 +283,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/documents/upload-url", isAuthenticated, isPresident, async (req: any, res) => {
     try {
+      console.log("[Documents] Getting upload URL for user:", req.user.claims.sub);
       const userId = req.user.claims.sub;
       const { filename } = req.body;
       
       if (!filename) {
+        console.log("[Documents] Error: Filename is required");
         return res.status(400).json({ error: "Filename is required" });
       }
 
+      console.log("[Documents] Requesting upload URL for file:", filename);
       const objectStorage = new ObjectStorageService();
       const { uploadURL, objectPath } = await objectStorage.getDocumentUploadURL(userId, filename);
+      console.log("[Documents] Upload URL generated successfully, path:", objectPath);
       res.json({ uploadURL, objectPath });
     } catch (error) {
-      console.error("Error getting upload URL:", error);
+      console.error("[Documents] Error getting upload URL:", error);
       res.status(500).json({ error: "Failed to get upload URL" });
     }
   });
 
   app.post("/api/documents", isAuthenticated, isPresident, async (req: any, res) => {
     try {
+      console.log("[Documents] Creating document for user:", req.user.claims.sub);
+      console.log("[Documents] Request body:", JSON.stringify(req.body, null, 2));
       const userId = req.user.claims.sub;
       const documentData = {
         ...req.body,
         uploadedBy: userId,
       };
+      console.log("[Documents] Validating document data...");
       const validatedData = insertDocumentSchema.parse(documentData);
+      console.log("[Documents] Validation successful");
       
       // Security: Validate fileUrl if provided
       if (validatedData.fileUrl) {
+        console.log("[Documents] Validating fileUrl:", validatedData.fileUrl);
         if (!validatedData.fileUrl.startsWith("/objects/documents/")) {
+          console.log("[Documents] Error: Invalid document URL prefix");
           return res.status(400).json({ error: "Invalid document URL" });
         }
         // Presidents can only set documents they uploaded
         if (!validatedData.fileUrl.includes(`/documents/${userId}/`)) {
+          console.log("[Documents] Error: User trying to use someone else's document");
           return res.status(403).json({ error: "You can only use documents you uploaded" });
         }
       }
       
+      console.log("[Documents] Creating document in storage...");
       const document = await storage.createDocument(validatedData);
+      console.log("[Documents] Document created successfully:", document.id);
       res.json(document);
     } catch (error) {
-      console.error("Error creating document:", error);
+      console.error("[Documents] Error creating document:", error);
+      if (error instanceof Error) {
+        console.error("[Documents] Error details:", error.message, error.stack);
+      }
       res.status(400).json({ error: "Invalid document data" });
     }
   });

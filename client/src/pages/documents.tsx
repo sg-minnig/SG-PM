@@ -33,13 +33,17 @@ export default function Documents() {
     queryKey: ["/api/documents"],
   });
 
-  // Fetch team members to get available positions
-  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
-    queryKey: ["/api/team-members"],
-  });
-
-  // Get unique positions
-  const positions = Array.from(new Set(teamMembers.map(m => m.position)));
+  // Standard executive positions
+  const positions = [
+    "President",
+    "Vice President",
+    "Treasurer",
+    "Secretary",
+    "VP Events",
+    "VP Marketing",
+    "VP Operations",
+    "VP Technology"
+  ];
 
   // Analyze document mutation
   const analyzeMutation = useMutation({
@@ -123,7 +127,9 @@ export default function Documents() {
       try {
         // Create a dummy file for consistent storage
         const blob = new Blob([documentContent], { type: "text/plain" });
-        const file = new File([blob], documentName, { type: "text/plain" });
+        // Ensure filename has .txt extension
+        const filename = documentName.endsWith('.txt') ? documentName : `${documentName}.txt`;
+        const file = new File([blob], filename, { type: "text/plain" });
 
         // Get presigned upload URL
         const uploadData = (await apiRequest(
