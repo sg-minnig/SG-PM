@@ -242,19 +242,19 @@
   body {
     @apply text-foreground font-sans antialiased;
     background: linear-gradient(135deg, 
-      hsl(0, 90%, 70%) 0%,
-      hsl(50, 95%, 65%) 33%,
-      hsl(220, 85%, 68%) 66%,
-      hsl(0, 88%, 72%) 100%);
+      hsl(0, 85%, 82%) 0%,
+      hsl(50, 90%, 78%) 33%,
+      hsl(220, 80%, 83%) 66%,
+      hsl(0, 83%, 84%) 100%);
     background-attachment: fixed;
   }
 
   .dark body {
     background: linear-gradient(135deg, 
-      hsl(0, 80%, 28%) 0%,
-      hsl(50, 85%, 32%) 33%,
-      hsl(220, 75%, 30%) 66%,
-      hsl(0, 78%, 30%) 100%);
+      hsl(0, 75%, 35%) 0%,
+      hsl(50, 80%, 38%) 33%,
+      hsl(220, 70%, 36%) 66%,
+      hsl(0, 73%, 37%) 100%);
     background-attachment: fixed;
   }
 }
@@ -370,20 +370,20 @@
   .pastel-rainbow {
     background: linear-gradient(
       135deg,
-      hsl(0, 90%, 70%) 0%,
-      hsl(50, 95%, 65%) 33%,
-      hsl(220, 85%, 68%) 66%,
-      hsl(0, 88%, 72%) 100%
+      hsl(0, 85%, 82%) 0%,
+      hsl(50, 90%, 78%) 33%,
+      hsl(220, 80%, 83%) 66%,
+      hsl(0, 83%, 84%) 100%
     );
   }
 
   .dark .pastel-rainbow {
     background: linear-gradient(
       135deg,
-      hsl(0, 80%, 28%) 0%,
-      hsl(50, 85%, 32%) 33%,
-      hsl(220, 75%, 30%) 66%,
-      hsl(0, 78%, 30%) 100%
+      hsl(0, 75%, 35%) 0%,
+      hsl(50, 80%, 38%) 33%,
+      hsl(220, 70%, 36%) 66%,
+      hsl(0, 73%, 37%) 100%
     );
   }
 }
