@@ -9,10 +9,12 @@ An AI-powered project management application designed for club executives to man
 **Key Features**:
 - AI-powered task generation from uploaded transition documents
 - Role-based timeline tracking for team members
-- Kanban board for visual task management
+- Kanban board for visual task management showing complete timelines for all team members
 - Document upload and analysis
 - Task review and approval workflow
-- Team member management and progress tracking
+- Team member management with contact information (email, phone, Instagram, advisor details)
+- Profile image uploads using Replit Object Storage
+- Individual profile editing for team members
 
 ## User Preferences
 
@@ -37,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 
 **Routing**: 
 - Wouter for client-side routing (lightweight alternative to React Router)
-- Routes: Dashboard, Tasks, Kanban, Role Timelines, Documents, Team, Task Review
+- Routes: Dashboard, Tasks, Kanban, Role Timelines, Documents, Team, My Profile, Team Setup (presidents only), Task Review
 
 **Theming**:
 - Custom theme provider supporting light/dark modes
@@ -54,6 +56,10 @@ Preferred communication style: Simple, everyday language.
 - `/api/timeline-tasks/:memberId` - GET custom timeline tasks for a team member
 - `/api/timeline-tasks` - POST create new custom timeline task
 - `/api/timeline-tasks/:id` - PATCH update task, DELETE remove task
+- `/api/profile-image/upload-url` - POST get presigned URL for profile image upload (authenticated, bound to user)
+- `/objects/:objectPath` - GET serve uploaded profile images with server-side validation
+- `/api/team-members` - GET all members, POST create member (presidents only)
+- `/api/team-members/:id` - PATCH update member (own profile or president), DELETE remove member (presidents only)
 
 **Data Validation**: Zod schemas (shared between client/server via `@shared/schema`) for runtime type safety and validation.
 
@@ -69,8 +75,8 @@ Preferred communication style: Simple, everyday language.
 **Database Dialect**: PostgreSQL (configured via Neon serverless driver)
 
 **Schema Design**:
-- `users` - User authentication (id, username, password)
-- `team_members` - Team member profiles (id, name, role, email, avatarColor)
+- `users` - User authentication (id, username, password, role, firstName, lastName, email)
+- `team_members` - Team member profiles (id, name, position, email, phone, instagram, advisorName, advisorEmail, avatarColor, profileImageUrl, userId)
 - `custom_timeline_tasks` - User-created timeline tasks (id, memberId, title, status, order, isCustom, createdAt)
 - `tasks` - Project tasks (id, title, description, status, assigneeId, deadline, priority, documentId, aiGenerated, approved, createdAt)
 - `documents` - Uploaded documents (id, name, size, uploadedAt, analyzed)
@@ -115,3 +121,12 @@ Preferred communication style: Simple, everyday language.
 - Configured for Replit with cartographer and dev banner plugins
 - Hot module replacement (HMR) via Vite
 - Runtime error overlay for development feedback
+
+**Object Storage**:
+- Replit Object Storage (Google Cloud Storage backend) for profile image uploads
+- Presigned URL upload flow for secure direct-to-storage uploads
+- User-bound upload paths: `/objects/profile-images/{userId}/{uuid}`
+- Server-side validation: 5MB max size, image content-types only
+- Public read access for profile images, write access restricted to authenticated users
+- ACL policy framework for future access control needs
+- File upload UI using Uppy (@uppy/core, @uppy/react, @uppy/dashboard, @uppy/aws-s3)
