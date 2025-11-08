@@ -19,7 +19,8 @@ export default function TeamSetup() {
   const [newMember, setNewMember] = useState({
     name: "",
     position: "",
-    advisor: "",
+    advisorName: "",
+    advisorEmail: "",
     email: "",
     avatarColor: "#3b82f6",
     profileImageUrl: null as string | null,
@@ -45,7 +46,8 @@ export default function TeamSetup() {
       setNewMember({
         name: "",
         position: "",
-        advisor: "",
+        advisorName: "",
+        advisorEmail: "",
         email: "",
         avatarColor: "#3b82f6",
         profileImageUrl: null,
@@ -216,13 +218,24 @@ export default function TeamSetup() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="advisor">Advisor</Label>
+                  <Label htmlFor="advisorName">Advisor Name</Label>
                   <Input
-                    id="advisor"
-                    value={newMember.advisor}
-                    onChange={(e) => setNewMember({ ...newMember, advisor: e.target.value })}
+                    id="advisorName"
+                    value={newMember.advisorName}
+                    onChange={(e) => setNewMember({ ...newMember, advisorName: e.target.value })}
                     placeholder="Dr. Sarah Martinez"
-                    data-testid="input-member-advisor"
+                    data-testid="input-advisor-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="advisorEmail">Advisor Email</Label>
+                  <Input
+                    id="advisorEmail"
+                    type="email"
+                    value={newMember.advisorEmail}
+                    onChange={(e) => setNewMember({ ...newMember, advisorEmail: e.target.value })}
+                    placeholder="sarah.martinez@university.edu"
+                    data-testid="input-advisor-email"
                   />
                 </div>
               </div>
@@ -359,10 +372,13 @@ export default function TeamSetup() {
                     <div>
                       <h3 className="font-semibold">{member.name}</h3>
                       <p className="text-sm text-muted-foreground">{member.position}</p>
-                      {member.advisor && (
-                        <p className="text-xs text-muted-foreground/80 mt-1">
-                          Advisor: {member.advisor}
-                        </p>
+                      {member.advisorName && (
+                        <div className="text-xs text-muted-foreground/80 mt-1 space-y-0.5">
+                          <p>Advisor: {member.advisorName}</p>
+                          {member.advisorEmail && (
+                            <p className="truncate">{member.advisorEmail}</p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

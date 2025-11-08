@@ -51,7 +51,8 @@ export default function Dashboard() {
   const roleTimelines = teamMembers.map((member) => ({
     memberName: member.name,
     role: member.position,
-    advisor: member.advisor,
+    advisorName: member.advisorName,
+    advisorEmail: member.advisorEmail,
     avatarColor: member.avatarColor,
     tasks: [
       { id: `${member.id}-1`, title: "Review transition documents", status: "completed" as const, order: 1 },

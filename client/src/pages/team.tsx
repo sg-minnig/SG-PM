@@ -82,12 +82,19 @@ export default function Team() {
                     </span>
                   </div>
 
-                  {member.advisor && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground/80 w-full pt-1 border-t border-border">
-                      <User2 className="h-3 w-3 flex-shrink-0" />
-                      <span className="text-xs truncate">
-                        Advisor: {member.advisor}
-                      </span>
+                  {member.advisorName && (
+                    <div className="flex flex-col gap-0.5 text-sm text-muted-foreground/80 w-full pt-1 border-t border-border">
+                      <div className="flex items-center gap-1">
+                        <User2 className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs truncate">
+                          Advisor: {member.advisorName}
+                        </span>
+                      </div>
+                      {member.advisorEmail && (
+                        <span className="text-xs truncate ml-4 text-muted-foreground/60">
+                          {member.advisorEmail}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>

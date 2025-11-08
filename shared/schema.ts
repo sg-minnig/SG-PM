@@ -33,7 +33,8 @@ export const teamMembers = pgTable("team_members", {
   userId: varchar("user_id"), // references users.id - null until user logs in
   name: text("name").notNull(),
   position: text("position").notNull(), // "President", "Vice President", etc.
-  advisor: text("advisor"),
+  advisorName: text("advisor_name"),
+  advisorEmail: text("advisor_email"),
   email: text("email").notNull().unique(), // Used to link to user account
   avatarColor: text("avatar_color").notNull(),
   profileImageUrl: text("profile_image_url"), // URL to uploaded profile image in object storage
