@@ -34,7 +34,7 @@ export default function Landing() {
           <div className="space-y-6">
             <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white">
               Streamline Your Club's
-              <span className="block text-violet-600 dark:text-violet-400 mt-2">Executive Transition</span>
+              <span className="block text-slate-800 dark:text-slate-300 mt-2">Executive Transition</span>
             </h2>
             <p className="text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
               AI-powered project management for club executives. Track role-specific tasks,
