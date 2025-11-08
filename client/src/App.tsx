@@ -17,6 +17,7 @@ import Team from "@/pages/team";
 import TeamTimelines from "@/pages/team-timelines";
 import TeamSetup from "@/pages/team-setup";
 import TaskReview from "@/pages/task-review";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
           <Route path="/team-setup" component={TeamSetup} />
           <Route path="/documents" component={Documents} />
           <Route path="/team" component={Team} />
+          <Route path="/profile" component={Profile} />
           <Route path="/task-review" component={TaskReview} />
         </>
       )}

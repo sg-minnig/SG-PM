@@ -8,6 +8,7 @@ import {
   Target,
   UserPlus,
   LogOut,
+  User,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -133,14 +134,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-settings">
-                  <Link href="/settings">
-                    <Settings className="h-4 w-4" />
-                    <span>Settings</span>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location === "/profile"}
+                  data-testid="link-profile"
+                >
+                  <Link href="/profile">
+                    <User className="h-4 w-4" />
+                    <span>My Profile</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
