@@ -243,7 +243,7 @@
     @apply text-foreground font-sans antialiased;
     background: linear-gradient(135deg, 
       hsl(230, 100%, 90%) 0%,
-      hsl(280, 100%, 88%) 25%,
+      hsl(200, 100%, 88%) 25%,
       hsl(330, 100%, 86%) 50%,
       hsl(15, 100%, 84%) 75%,
       hsl(220, 100%, 88%) 100%);
@@ -253,7 +253,7 @@
   .dark body {
     background: linear-gradient(135deg, 
       hsl(230, 60%, 20%) 0%,
-      hsl(280, 60%, 18%) 25%,
+      hsl(200, 60%, 18%) 25%,
       hsl(330, 60%, 16%) 50%,
       hsl(15, 60%, 15%) 75%,
       hsl(220, 60%, 18%) 100%);
@@ -373,7 +373,7 @@
     background: linear-gradient(
       135deg,
       hsl(230, 100%, 90%) 0%,
-      hsl(280, 100%, 88%) 25%,
+      hsl(200, 100%, 88%) 25%,
       hsl(330, 100%, 86%) 50%,
       hsl(15, 100%, 84%) 75%,
       hsl(220, 100%, 88%) 100%
@@ -384,7 +384,7 @@
     background: linear-gradient(
       135deg,
       hsl(230, 60%, 20%) 0%,
-      hsl(280, 60%, 18%) 25%,
+      hsl(200, 60%, 18%) 25%,
       hsl(330, 60%, 16%) 50%,
       hsl(15, 60%, 15%) 75%,
       hsl(220, 60%, 18%) 100%
