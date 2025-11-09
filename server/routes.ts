@@ -3,7 +3,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isPresident } from "./replitAuth";
-import { insertCustomTimelineTaskSchema, insertTeamMemberSchema, insertDocumentSchema, insertTaskSchema } from "@shared/schema";
+import { insertCustomTimelineTaskSchema, insertTeamMemberSchema, insertDocumentSchema, insertTaskSchema, insertEventSchema } from "@shared/schema";
 import { ObjectStorageService, objectStorageClient } from "./objectStorage";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -488,6 +488,110 @@ Generate 5-15 tasks. Return only valid JSON, no other text.`;
       res.json({ success: true });
     } catch (error) {
       res.status(400).json({ error: "Failed to delete task" });
+    }
+  });
+
+  // Event routes (calendar events)
+  app.get("/api/events", isAuthenticated, async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch events" });
+    }
+  });
+
+  app.post("/api/events", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventData = {
+        ...req.body,
+        // Convert ISO strings to Date objects for validation
+        startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
+        createdBy: userId,
+      };
+      const validatedData = insertEventSchema.parse(eventData);
+      const event = await storage.createEvent(validatedData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(400).json({ error: "Invalid event data" });
+    }
+  });
+
+  app.patch("/api/events/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Fetch the user to check role
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        res.status(401).json({ error: "User not found" });
+        return;
+      }
+      
+      // Fetch the event to check ownership
+      const existingEvent = await storage.getEventById(id);
+      if (!existingEvent) {
+        res.status(404).json({ error: "Event not found" });
+        return;
+      }
+      
+      // Only the creator or a president can update the event
+      if (existingEvent.createdBy !== userId && currentUser.role !== "president") {
+        res.status(403).json({ error: "You don't have permission to update this event" });
+        return;
+      }
+      
+      // Validate update data and prevent changing createdBy
+      const { createdBy, ...updateData } = req.body;
+      // Convert ISO strings to Date objects for validation, preserving explicit null
+      const processedData = {
+        ...updateData,
+        startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
+        endDate: updateData.endDate === null ? null : (updateData.endDate ? new Date(updateData.endDate) : undefined),
+      };
+      const validatedData = insertEventSchema.partial().parse(processedData);
+      
+      const event = await storage.updateEvent(id, validatedData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(400).json({ error: "Failed to update event" });
+    }
+  });
+
+  app.delete("/api/events/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Fetch the user to check role
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        res.status(401).json({ error: "User not found" });
+        return;
+      }
+      
+      // Fetch the event to check ownership
+      const existingEvent = await storage.getEventById(id);
+      if (!existingEvent) {
+        res.status(404).json({ error: "Event not found" });
+        return;
+      }
+      
+      // Only the creator or a president can delete the event
+      if (existingEvent.createdBy !== userId && currentUser.role !== "president") {
+        res.status(403).json({ error: "You don't have permission to delete this event" });
+        return;
+      }
+      
+      const deleted = await storage.deleteEvent(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(400).json({ error: "Failed to delete event" });
     }
   });
 

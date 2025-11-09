@@ -15,6 +15,7 @@ An AI-powered project management application designed for club executives to man
 - Team member management with contact information (email, phone, Instagram, advisor details)
 - Profile image uploads using Replit Object Storage
 - Individual profile editing for team members
+- Collaborative event calendar for scheduling team events and important dates
 
 ## User Preferences
 
@@ -39,7 +40,7 @@ Preferred communication style: Simple, everyday language.
 
 **Routing**: 
 - Wouter for client-side routing (lightweight alternative to React Router)
-- Routes: Dashboard, Tasks, Kanban, Role Timelines, Documents, Team, My Profile, Team Setup (presidents only), Task Review
+- Routes: Dashboard, Tasks, Kanban, Role Timelines, Calendar, Documents, Team, My Profile, Team Setup (presidents only), Task Review
 
 **Theming**:
 - Custom theme provider supporting light/dark modes
@@ -56,6 +57,8 @@ Preferred communication style: Simple, everyday language.
 - `/api/timeline-tasks/:memberId` - GET custom timeline tasks for a team member
 - `/api/timeline-tasks` - POST create new custom timeline task
 - `/api/timeline-tasks/:id` - PATCH update task, DELETE remove task
+- `/api/events` - GET all events, POST create event (authenticated)
+- `/api/events/:id` - PATCH update event (owner or president), DELETE remove event (owner or president)
 - `/api/profile-image/upload-url` - POST get presigned URL for profile image upload (authenticated, bound to user)
 - `/api/documents/upload-url` - POST get presigned URL for document upload (presidents only)
 - `/api/documents` - GET all documents, POST create document (presidents only)
@@ -184,6 +187,42 @@ Preferred communication style: Simple, everyday language.
 **Navigation**:
 - Documents page visible only to presidents
 - Task Review page visible only to presidents (accessible via sidebar)
+
+### Collaborative Event Calendar
+
+**Feature Overview**: Team members can create, view, edit, and delete events through a shared calendar interface. All authenticated users have full access to create events, while edit/delete permissions are restricted to event owners or presidents.
+
+**Calendar Features**:
+- Month view calendar grid showing all events
+- Visual color coding for different event types (6 color options)
+- Upcoming events list with detailed information
+- Event details include: title, description, start/end dates, location, color
+- Click-to-create events on calendar day cells
+- Full CRUD operations with proper authorization
+
+**User Permissions**:
+- Any authenticated user can create events
+- Users can edit/delete their own events
+- Presidents can edit/delete any event
+- Automatic event ownership tracking via `createdBy` field
+
+**Technical Implementation**:
+- Frontend: Calendar page using React Hook Form with zodResolver for validation
+- Frontend: Month navigation with previous/next/today controls
+- Frontend: Form schema with z.coerce.date() for proper date serialization
+- Backend: Event API with proper authentication and authorization checks
+- Backend: Date conversion from ISO strings to Date objects for validation
+- Backend: Explicit null handling for optional endDate field
+- Database: events table with title, description, dates, location, color, and creator tracking
+
+**Data Validation**:
+- Required fields: title, startDate, color
+- Optional fields: description, endDate, location
+- Date serialization handled via coercion in both frontend and backend
+- Form validation prevents submission of invalid data
+
+**Navigation**:
+- Calendar page accessible to all authenticated users via sidebar
 
 ### Visual Design: Lovable-Inspired Gradient
 

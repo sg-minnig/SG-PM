@@ -12,6 +12,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import Kanban from "@/pages/kanban";
+import Calendar from "@/pages/calendar";
 import Documents from "@/pages/documents";
 import Team from "@/pages/team";
 import TeamTimelines from "@/pages/team-timelines";
@@ -43,6 +44,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
           <Route path="/kanban" component={Kanban} />
+          <Route path="/calendar" component={Calendar} />
           <Route path="/timelines" component={TeamTimelines} />
           <Route path="/team-setup" component={TeamSetup} />
           <Route path="/documents" component={Documents} />

@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   LayoutGrid,
+  Calendar,
   Upload,
   Users,
   Settings,
@@ -47,6 +48,12 @@ const baseMenuItems = [
     url: "/kanban",
     icon: LayoutGrid,
     testId: "link-kanban",
+  },
+  {
+    title: "Calendar",
+    url: "/calendar",
+    icon: Calendar,
+    testId: "link-calendar",
   },
   {
     title: "Role Timelines",

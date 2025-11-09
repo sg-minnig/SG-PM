@@ -81,6 +81,18 @@ export const documents = pgTable("documents", {
   analyzed: boolean("analyzed").default(false),
 });
 
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  location: text("location"),
+  color: text("color").notNull().default("#3b82f6"), // Default blue color
+  createdBy: varchar("created_by").notNull(), // User ID who created the event
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   teamMember: one(teamMembers, {
@@ -133,6 +145,11 @@ export const insertCustomTimelineTaskSchema = createInsertSchema(customTimelineT
   isCustom: true,
 });
 
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -145,3 +162,5 @@ export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type CustomTimelineTask = typeof customTimelineTasks.$inferSelect;
 export type InsertCustomTimelineTask = z.infer<typeof insertCustomTimelineTaskSchema>;
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;

@@ -5,6 +5,7 @@ import {
   customTimelineTasks,
   documents,
   tasks,
+  events,
   type User,
   type UpsertUser,
   type TeamMember,
@@ -15,6 +16,8 @@ import {
   type InsertDocument,
   type Task,
   type InsertTask,
+  type Event,
+  type InsertEvent,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -55,6 +58,13 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, updates: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: string): Promise<boolean>;
+  
+  // Events
+  getEvents(): Promise<Event[]>;
+  getEventById(id: string): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: string, updates: Partial<InsertEvent>): Promise<Event | undefined>;
+  deleteEvent(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -277,6 +287,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: string): Promise<boolean> {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Events
+  async getEvents(): Promise<Event[]> {
+    return await db.select().from(events);
+  }
+
+  async getEventById(id: string): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async createEvent(eventData: InsertEvent): Promise<Event> {
+    const [event] = await db.insert(events).values(eventData).returning();
+    return event;
+  }
+
+  async updateEvent(id: string, updates: Partial<InsertEvent>): Promise<Event | undefined> {
+    const [event] = await db
+      .update(events)
+      .set(updates)
+      .where(eq(events.id, id))
+      .returning();
+    return event;
+  }
+
+  async deleteEvent(id: string): Promise<boolean> {
+    const result = await db.delete(events).where(eq(events.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 }
