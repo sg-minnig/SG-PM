@@ -73,28 +73,31 @@ Preferred communication style: Simple, everyday language.
 **Data Validation**: Zod schemas (shared between client/server via `@shared/schema`) for runtime type safety and validation.
 
 **Storage Layer**: 
-- Interface-based storage abstraction (`IStorage`) with methods for users, team members, tasks, documents, and timeline tasks
-- Current implementation: Database-backed storage (`DatabaseStorage`) using Drizzle ORM
+- Interface-based storage abstraction (`IStorage`) with methods for users, team members, tasks, documents, timeline tasks, and events
+- Production implementation: Database-backed storage (`DatabaseStorage`) using Drizzle ORM
 - PostgreSQL database via Neon serverless driver
+- All data is persisted permanently
 
-**Session Management**: Placeholder for connect-pg-simple session storage (configured but not actively used in current implementation).
+**Session Management**: Express session storage using connect-pg-simple for persistent sessions in PostgreSQL.
 
 ### Database Schema (Drizzle ORM)
 
 **Database Dialect**: PostgreSQL (configured via Neon serverless driver)
 
 **Schema Design**:
-- `users` - User authentication (id, username, password, role, firstName, lastName, email)
+- `users` - User authentication (id, email, role, firstName, lastName, profileImageUrl)
 - `team_members` - Team member profiles (id, name, position, email, phone, instagram, advisorName, advisorEmail, avatarColor, profileImageUrl, userId)
 - `custom_timeline_tasks` - User-created timeline tasks (id, memberId, title, status, order, isCustom, createdAt)
 - `tasks` - AI-generated and manual tasks (id, title, description, status, position, assigneeId, deadline, priority, documentId, aiGenerated, approved, order, createdAt)
 - `documents` - Uploaded transition documents (id, name, position, fileUrl, content, size, uploadedAt, uploadedBy, analyzed)
+- `events` - Team calendar events (id, title, description, startDate, endDate, location, color, createdBy, createdAt)
+- `sessions` - Express session storage for authentication
 
 **UUID Strategy**: PostgreSQL `gen_random_uuid()` for primary keys.
 
 **Migration Strategy**: Drizzle Kit for schema migrations with `drizzle-kit push` command.
 
-**Current Status**: Schema defined but application currently uses in-memory storage. Database connection configured but not actively used - the storage layer is designed to be swapped from `MemStorage` to a Drizzle-based implementation.
+**Current Status**: Database is active and all tables are synchronized. The application uses permanent PostgreSQL storage for all data.
 
 ### External Dependencies
 
