@@ -17,10 +17,10 @@ export default function Landing() {
           <div className="flex items-center gap-3">
             <img 
               src={logoImage} 
-              alt="ChapterOps Logo" 
+              alt="Chapterboard Logo" 
               className="h-10 w-10 object-contain"
             />
-            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">ChapterOps</h1>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Chapterboard</h1>
           </div>
           <Button onClick={handleLogin} variant="secondary" data-testid="button-login">
             Log In

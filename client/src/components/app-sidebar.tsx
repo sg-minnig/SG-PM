@@ -118,11 +118,11 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <img 
             src={logoImage} 
-            alt="ChapterOps Logo" 
+            alt="Chapterboard Logo" 
             className="h-8 w-8 object-contain"
           />
           <div>
-            <h2 className="text-base font-semibold text-sidebar-foreground">ChapterOps</h2>
+            <h2 className="text-base font-semibold text-sidebar-foreground">Chapterboard</h2>
             <p className="text-xs text-muted-foreground">Club Executive Manager</p>
           </div>
         </div>
