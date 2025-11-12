@@ -8,11 +8,16 @@ console.log(
 const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "true";
 const app = express();
 
+
+const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "true";
+const server = await registerRoutes(app, { authRequired: AUTH_REQUIRED });
+
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
   }
-}
+} 
+
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
