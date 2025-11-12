@@ -3,11 +3,11 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 console.log(
-  "AUTH_REQUIRED =", process.env.AUTH_REQUIRED,
-  "OIDC_CLIENT_ID set?", Boolean(process.env.OIDC_CLIENT_ID)
+  "GOOGLE_CLIENT_ID set?", Boolean(process.env.GOOGLE_CLIENT_ID),
+  "GOOGLE_CLIENT_SECRET set?", Boolean(process.env.GOOGLE_CLIENT_SECRET),
+  "SESSION_SECRET set?", Boolean(process.env.SESSION_SECRET)
 );
 
-const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "false";
 const app = express();
 
 declare module "http" {
@@ -16,13 +16,17 @@ declare module "http" {
   }
 }
 
-app.use(express.json({
-  verify: (req, _res, buf) => {
-    req.rawBody = buf;
-  }
-}));
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
+
 app.use(express.urlencoded({ extended: false }));
 
+// Request logging for API routes
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -38,7 +42,8 @@ app.use((req, res, next) => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      if (capturedJsonResponse)
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       if (logLine.length > 80) logLine = logLine.slice(0, 79) + "…";
       log(logLine);
     }
@@ -48,13 +53,17 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app, { authRequired: AUTH_REQUIRED });
+  // ✅ Only pass the app — no second argument
+  const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ error: { message } });
-  });
+  // Global error handler
+  app.use(
+    (err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      res.status(status).json({ error: { message } });
+    }
+  );
 
   const port = process.env.PORT || 3000;
   server.listen(port, () => {
