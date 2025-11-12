@@ -48,9 +48,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // ✅ Only call registerRoutes once, and pass the flag
   const server = await registerRoutes(app, { authRequired: AUTH_REQUIRED });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Ser
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ error: { message } });
+  });
+
+  const port = process.env.PORT || 3000;
+  server.listen(port, () => {
+    log(`Server listening on port ${port}`);
+  });
+})();
