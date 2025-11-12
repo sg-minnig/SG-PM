@@ -1,7 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-
+console.log(
+  "AUTH_REQUIRED =", process.env.AUTH_REQUIRED,
+  "OIDC_CLIENT_ID set?", Boolean(process.env.OIDC_CLIENT_ID)
+);
+const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "true";
 const app = express();
 
 declare module 'http' {
