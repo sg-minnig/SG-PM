@@ -7,7 +7,7 @@ console.log(
   "OIDC_CLIENT_ID set?", Boolean(process.env.OIDC_CLIENT_ID)
 );
 
-const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "true";
+const AUTH_REQUIRED = process.env.AUTH_REQUIRED === "false";
 const app = express();
 
 declare module "http" {
